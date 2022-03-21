@@ -1,9 +1,16 @@
 # Kos
 
+<p align="center">
+  <img src="https://img.shields.io/github/last-commit/TruncatedDinosour/kos?color=red&style=flat-square">
+  <img src="https://img.shields.io/github/repo-size/TruncatedDinosour/kos?color=red&style=flat-square">
+  <img src="https://img.shields.io/github/issues/TruncatedDinosour/kos?color=red&style=flat-square">
+  <img src="https://img.shields.io/github/stars/TruncatedDinosour/kos?color=red&style=flat-square">
+</p>
+
 > A simple SUID tool written in C++
 
 <p align="center">
-    <img src="/logo/kos.png" alt="kos logo" height="80%"/>
+    <img src="/logo/kos.png" alt="kos logo" height="50%"/>
 </p>
 
 # Requirements
