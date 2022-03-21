@@ -85,7 +85,7 @@ inline bool is_passible_root(void) {
 
 int validate_password(amm_t __times = 0) {
     if (is_passible_root())
-        return true;
+        return EXIT_SUCCESS;
 
     ERRORIF_COND("Negative or zero value for PASSWORD_AMMOUNT",
                  PASSWORD_AMMOUNT <= 0);
