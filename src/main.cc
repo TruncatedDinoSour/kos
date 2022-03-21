@@ -14,6 +14,7 @@
 // FD //
 
 inline char *get_username(void);
+inline bool is_passible_root(void);
 int validate_password(amm_t __times);
 std::string input_no_echo(std::string prompt, char end);
 inline void log_error(std::string emsg);
@@ -76,9 +77,14 @@ inline void log_error(std::string emsg) {
     std::cerr << "ERROR: " << emsg << '\n';
 }
 
+inline bool is_passible_root(void) {
+    // Skips checking of password if the user is already root
+    return getuid() == ROOT_UID && getgid() == ROOT_GID &&
+           geteuid() == ROOT_UID && SKIP_ROOT_AUTH;
+}
+
 int validate_password(amm_t __times = 0) {
-    if (getuid() == ROOT_UID && SKIP_ROOT_PASS)
-        // Skips checking of password if the user is already root
+    if (is_passible_root())
         return true;
 
     ERRORIF_COND("Negative or zero value for PASSWORD_AMMOUNT",
@@ -165,6 +171,9 @@ int get_group_count(void) {
 }
 
 int validate_group(void) {
+    if (is_passible_root())
+        return EXIT_SUCCESS;
+
     const int group_count = get_group_count();
     const char *username  = get_username();
     bool is_in_group      = false;

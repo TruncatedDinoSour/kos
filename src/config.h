@@ -16,8 +16,9 @@ static amm_t PASSWORD_AMMOUNT = 3;
 /* Increment ammount for PASSWORD_AMMOUNT */
 static amm_t PASSWORD_AMMOUNT_INC = 1;
 
-/* Should kos skip asking for password is the user is already root? */
-const static short unsigned int SKIP_ROOT_PASS = 1;
+/* Should kos skip checking authentication if the user is the user is already
+ * root? */
+const static short unsigned int SKIP_ROOT_AUTH = 1;
 
 /* Main kos group which all users have to be a part of when using kos */
 const static char *MAIN_GROUP = "kos";
