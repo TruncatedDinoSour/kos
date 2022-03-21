@@ -1,5 +1,5 @@
 /* The type used to count times the password has been entered */
-typedef unsigned int amm_t;
+typedef long int amm_t;
 
 /* What is root user ID? */
 short unsigned int ROOT_UID = 0;
