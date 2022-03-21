@@ -18,6 +18,10 @@
 - Pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
 - Libxcrypt: https://github.com/besser82/libxcrypt
 
+# Third party software support
+
+- [Bash completion](https://github.com/scop/bash-completion) (Install `completions/kos` into `/usr/share/bash-completion/completions/kos`)
+
 # Known issues
 
 - Overcomplicated `input_no_echo()` function
