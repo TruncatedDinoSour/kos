@@ -77,11 +77,6 @@ inline void log_error(std::string emsg) {
 }
 
 int validate_password(amm_t __times = 0) {
-    /*
-     * Returns `true` on success and `false` on failure
-     * Argument `messages` decides if the function should print messages
-     */
-
     if (getuid() == ROOT_UID && SKIP_ROOT_PASS)
         // Skips checking of password if the user is already root
         return true;
