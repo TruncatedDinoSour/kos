@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ** bash completion script **
+# -*- shell script -*-
 
 _kos() {
     local words cword cmd
