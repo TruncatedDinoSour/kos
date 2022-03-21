@@ -94,7 +94,9 @@ give it suid privelages using 4711 permissions,
 the program executable should also be owned by the root
 user and group, program should first check
 if a command is supplied as not to
-trigger any bugs, then we validate the password using passwd
+trigger any bugs, then we validate that the
+user is in a master, by default kos, group and if
+that passes we go on to validate the password using passwd
 struct for getting the username of current logged in user,
 getuid() for getting uid of current user and then getting
 /etc/shadow entry using <shadow.h> for that specific user

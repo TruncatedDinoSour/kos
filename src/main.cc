@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
-    ERRORIF_COND("Usage: <command> [args..]",
+    ERRORIF_COND("Usage: <command> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
 
     if (validate_password() != EXIT_SUCCESS)

@@ -3,18 +3,45 @@
 
 .SH NAME
 
-kos \- a simple SUID tool
+kos - a simple SUID tool
 
 
 .SH SYNOPSIS
 
 .B kos
-<\fICOMMAND\fR> [\fIFLAGS\fR]
+<\fICOMMAND\fR> [\fIARGS...\fR]
 
 
 .SH AUTHOR
 
 Written by Ari Archer <\fIari.web.xyz@gmail.com\fR>
+
+
+.SH "RETURN VALUE"
+
+Returns the exit code of the ran program
+
+
+.SH FILES
+
+.TP
+/etc/shadow
+Secure user account information\&.
+
+.TP
+/etc/passwd
+User account information\&.
+
+.TP
+/etc/group
+The groups to which users belong under\&.
+
+
+.SH "SEE ALSO"
+
+.BR shadow (3),
+.BR passwd (1),
+.BR group (5)
 
 
 .SH "REPORTING BUGS"
