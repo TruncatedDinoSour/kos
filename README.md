@@ -32,20 +32,6 @@ way I know how to disable eching of STDIN in linux with
 C++ without using some huge lib like GNU readline or something...
 ```
 
-- Excessive use of `<pwd.h>` to check username as `getlogin()` is unreliable
-  we use `<shadow.h>` for everything else
-
-```
-There is no good solution to this as far as I'm aware,
-I tried a lot, none of them worked... I even tried
-migrating to pwd.h fully but password valdation sucked,
-definally could only use pwd.h, but would take some work at least.
-Though I'm more comfortable with <shadow.h> so if there is
-a solution that would work without any weird stuff like getlogin()
-which can be easily fooled and easily breaks, please make a PR,
-but all PRs are welcome
-```
-
 # People packaging kos for non-corporate use
 
 ```
