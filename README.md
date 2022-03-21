@@ -10,7 +10,7 @@
 > A simple SUID tool written in C++
 
 <p align="center">
-    <img src="/logo/kos.png" alt="kos logo" height="50%"/>
+    <img src="/logo/kos.png" alt="kos logo" width="50%"/>
 </p>
 
 # Requirements
