@@ -20,7 +20,7 @@
 
 # Third party software support
 
-- [Bash completion](https://github.com/scop/bash-completion) (Install `completions/kos` into `/usr/share/bash-completion/completions/kos`)
+- [Bash completion](https://github.com/scop/bash-completion) (Install `completions/kos.bash` into `/usr/share/bash-completion/completions/kos`)
 
 # Known issues
 
