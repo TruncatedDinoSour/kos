@@ -174,14 +174,12 @@ int validate_group(void) {
     if (is_passible_root())
         return EXIT_SUCCESS;
 
-    const int group_count = get_group_count();
-    const char *username  = get_username();
-    bool is_in_group      = false;
+    const char *username = get_username();
+    int group_count      = get_group_count();
+    bool is_in_group     = false;
 
     struct passwd *pw;
     struct group *mg;
-
-    int ngroups;
 
 #define usr strerrno + ": for user " + username
 
@@ -194,14 +192,14 @@ int validate_group(void) {
     _errorif_cln_grp("Failed to getpwnam(): " + usr, pw == NULL);
 
     _errorif_cln_grp("Failed to get groups for user " + std::string(username),
-                     getgrouplist(username, pw->pw_gid, groups, &ngroups) ==
+                     getgrouplist(username, pw->pw_gid, groups, &group_count) ==
                          -1);
 
     mg = getgrnam(MAIN_GROUP);
     _errorif_cln_grp("Group `" + std::string(MAIN_GROUP) + "` does not exist",
                      mg == NULL);
 
-    for (int grp = 0; grp < ngroups; ++grp) {
+    for (int grp = 0; grp < group_count; ++grp) {
         if (groups[grp] == mg->gr_gid) {
             is_in_group = true;
             break;
