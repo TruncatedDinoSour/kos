@@ -124,7 +124,7 @@ exited with
 - Arch Linux
 
 ```
-Permission issues (ERROR: failed getting groups for user: Success: for user ...)
+Permission issues (ERROR: Failed getting groups for user ...)
     The issue can be solved with one install command:
     $ install -Dm4755 -o root "$srcdir/$pkgname-$pkgver/kos" "$pkgdir/usr/bin/kos"
 ```

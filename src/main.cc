@@ -193,7 +193,7 @@ int validate_group(void) {
     pw = getpwnam(username);
     _errorif_cln_grp("Failed to getpwnam(): " + usr, pw == NULL);
 
-    _errorif_cln_grp("Failed to get groups for user: " + usr,
+    _errorif_cln_grp("Failed to get groups for user " + std::string(username),
                      getgrouplist(username, pw->pw_gid, groups, &ngroups) ==
                          -1);
 
