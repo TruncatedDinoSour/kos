@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# -*- shell script -*-
+# kos(1) completion                                    -*- shell-script -*-
 
 _kos() {
     local words cword cmd
@@ -13,3 +12,5 @@ _kos() {
         fi
     done
 } && complete -F _kos -o bashdefault -o default kos
+
+# ex: filetype=sh
