@@ -119,7 +119,19 @@ finally we just exit with the code the child process
 exited with
 ```
 
+# Note for packagers
+
+- Arch Linux
+
+```
+Permission issues (ERROR: failed getting groups for user: Success: for user ...)
+    The issue can be solved with one install command:
+    $ install -Dm4755 -o root "$srcdir/$pkgname-$pkgver/kos" "$pkgdir/usr/bin/kos"
+```
+
 # Packages
 
-- Gentoo linux:
+- Gentoo Linux:
   - [app-admin/kos::dinolay](https://ari-web.xyz/gentooatom/app-admin/kos)
+- Arch Linux
+  - [AUR/kos@moonaru](https://aur.archlinux.org/packages/kos)
