@@ -24,6 +24,18 @@
 
 # Known issues
 
+- Only supported on Linux
+
+```
+shadow.h is one of the requirements of kos which is a "linux thing",
+so automatically won't work on something like OpenBSD, macOS, FreeBSD or
+any other BSDs.
+
+Kos will not work on any non-unix OSes as kos uses a lot of
+unix stuff, for example pwd.h, meaning will not work on stuff
+like Windows.
+```
+
 - Overcomplicated `input_no_echo()` function
 
 ```
