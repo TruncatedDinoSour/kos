@@ -34,6 +34,10 @@ any other BSDs.
 Kos will not work on any non-unix OSes as kos uses a lot of
 unix stuff, for example pwd.h, meaning will not work on stuff
 like Windows.
+
+Though this is not really a big issue, this app is meant to
+be ran on linux and was made with the intention to be used on
+and with linux...
 ```
 
 - Overcomplicated `input_no_echo()` function
