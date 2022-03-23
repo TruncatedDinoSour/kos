@@ -129,7 +129,7 @@ int run_command(char *command[]) {
         int ret_code = 0;
 
         ERRORIF_COND("Failed to execvp(): " + strerrno,
-                     (ret_code = execvp(command[0], command)) < 0)
+                     (ret_code = execvp(command[0], command)) < 0);
 
         return ret_code;
     }
@@ -183,7 +183,7 @@ int validate_group(void) {
 
 #define usr strerrno + ": for user " + username
 
-    ERRORIF_COND("Failed to get the user group count", group_count == -1)
+    ERRORIF_COND("Failed to get the user group count", group_count == -1);
 
     gid_t *groups = (gid_t *)malloc(sizeof(*groups) * group_count);
     ERRORIF_COND("malloc() failed in validate_group(): " + usr, groups == NULL);
@@ -212,7 +212,7 @@ int validate_group(void) {
 
     ERRORIF_COND("Permission denied: you are not a part of the `" +
                      std::string(MAIN_GROUP) + "` group.",
-                 !is_in_group)
+                 !is_in_group);
     return EXIT_SUCCESS;
 }
 
