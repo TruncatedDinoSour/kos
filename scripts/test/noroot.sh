@@ -1,15 +1,14 @@
 . scripts/test/noroot.lib.sh
+. scripts/test/config.sh
 
 main() {
-    cmd='id && whoami && echo "${USER:-$(id -un || printf %s "${HOME/*\//}")}@${HOSTNAME:-$(hostname)}"'
-
     log 'COMPILATION'
     compile
-    compile "$cmd"
+    compile "$TEST_CMD"
 
     log 'OPTIMISATION FLAGS'
     optimising
-    optimising "$cmd"
+    optimising "$TEST_CMD"
 }
 
 main "$@"
