@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
     ERRORIF_COND("Usage: <command> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
 
-    RETIF_FAIL(validate_password() != EXIT_SUCCESS);
+    RETIF_FAIL((validate_password() != EXIT_SUCCESS));
 
     ERRORIF_COND("Set{g/u}id() failed: " + strerrno,
                  setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1);

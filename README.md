@@ -161,3 +161,39 @@ Permission issues (ERROR: Failed getting groups for user ...)
   increases the size by 39KB (no optimisation), if you want to not set the env and have
   a smaller binary, disable that in `config.h` by commenting out the definition
 - If you every want to debug kos use `-g -Og` CXXFLAGS
+
+# Testing
+
+There are two scripts in the [testing scripts](/scripts/test) directory,
+one is `noroot.sh` and other `root.sh`, `*.lib.sh` are just
+libs.
+
+If you want to test it you just run the scripts, though which ones?
+
+- If you have access to root run: `root.sh`
+- If you have access to a non-privileged user run: `noroot.sh`
+- If you have access to both run.. Well both
+
+## Requirements
+
+- Clang
+- GCC
+- Coreutils
+- Bash
+- [Net-tools](http://net-tools.sourceforge.net/) (or a `hostname` command)
+
+## Net-tools is not a thing for me!
+
+You can easily make your own `hostname` command which is the
+only thing testing depends on:
+
+```sh
+#!/usr/bin/env sh
+cat /etc/hostname
+```
+
+Add this to /usr/bin/hostname and make it executable:
+
+```sh
+su -c 'chmod 755 /usr/bin/hostname'
+```
