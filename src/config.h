@@ -22,3 +22,14 @@ const static short unsigned int SKIP_ROOT_AUTH = 1;
 
 /* Main kos group which all users have to be a part of when using kos */
 const static char *MAIN_GROUP = "kos";
+
+// NOTE: All build size increasions are with
+// no optimisations
+
+/* Do you want to inherit groups to root user?
+ * (Increases build size by ~1KB) */
+#define HAVE_INITGROUP
+
+/* Do you want to modify environment?
+ * (Increases build size by ~39KB)*/
+#define HAVE_MODIFYENV

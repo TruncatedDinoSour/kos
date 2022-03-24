@@ -11,6 +11,10 @@
 
 #include "./config.h"
 
+#ifdef HAVE_MODIFYENV
+#include <unordered_map>
+#endif
+
 // FD //
 
 inline char *get_username(void);
@@ -21,8 +25,17 @@ inline void log_error(std::string emsg);
 int run_command(char *command[]);
 int get_group_count(void);
 int validate_group(void);
+int init(void);
+
+#ifdef HAVE_MODIFYENV
+int modify_env(const struct passwd *pw);
+#endif
 
 // MACROS //
+
+#define RETIF_FAIL(ret)      \
+    if (ret != EXIT_SUCCESS) \
+        return EXIT_FAILURE;
 
 #define ERRORIF_COND(emsg, cond) \
     if (cond) {                  \
@@ -216,6 +229,40 @@ int validate_group(void) {
     return EXIT_SUCCESS;
 }
 
+#ifdef HAVE_MODIFYENV
+int modify_env(const struct passwd *pw) {
+    std::unordered_map<const char *, char *> env = {{"HOME", pw->pw_dir},
+                                                    {"SHELL", pw->pw_shell}};
+
+    if (pw->pw_uid) {
+        env["USER"]    = pw->pw_name;
+        env["LOGNAME"] = env["USER"];
+    }
+
+    for (const auto entry : env)
+        ERRORIF_COND("Failed to modify environment: " + strerrno,
+                     setenv(entry.first, entry.second, 1));
+
+    return EXIT_SUCCESS;
+}
+#endif
+
+int init(void) {
+    struct passwd *pw = getpwuid(ROOT_UID);
+    ERRORIF_COND("Failed to getpwuid() in init(): " + strerrno, pw == NULL);
+
+#ifdef HAVE_INITGROUP
+    ERRORIF_COND("Failed to initgroups(): " + strerrno,
+                 initgroups(pw->pw_name, pw->pw_gid) == -1);
+#endif
+
+#ifdef HAVE_MODIFYENV
+    RETIF_FAIL(modify_env(pw));
+#endif
+
+    return EXIT_SUCCESS;
+}
+
 // MAIN //
 
 int main(int argc, char *argv[]) {
@@ -225,11 +272,12 @@ int main(int argc, char *argv[]) {
     ERRORIF_COND("Usage: <command> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
 
-    if (validate_password() != EXIT_SUCCESS)
-        return EXIT_FAILURE;
+    RETIF_FAIL(validate_password() != EXIT_SUCCESS);
 
     ERRORIF_COND("Set{g/u}id() failed: " + strerrno,
                  setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1);
+
+    RETIF_FAIL(init());
 
     argv++;
     return run_command(argv);

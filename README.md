@@ -151,3 +151,13 @@ Permission issues (ERROR: Failed getting groups for user ...)
   - [app-admin/kos::dinolay](https://ari-web.xyz/gentooatom/app-admin/kos)
 - Arch Linux
   - [AUR/kos@moonaru](https://aur.archlinux.org/packages/kos)
+
+# Tips
+
+- If you're building for size make sure to build with `-Os` or `-Oz` in `CXXFLAGS`
+  as it barely touches start times but it decreases the size largely, stripping
+  can help too
+- By default kos has modifying of the environment (I.e. USER, HOME, ...) enabled, this
+  increases the size by 39KB (no optimisation), if you want to not set the env and have
+  a smaller binary, disable that in `config.h` by commenting out the definition
+- If you every want to debug kos use `-g -Og` CXXFLAGS
