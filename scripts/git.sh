@@ -3,7 +3,7 @@
 set -e
 
 main() {
-    su -c './scripts/test/root.sh'
+    ${__BASH_DOAS:-kos} ./scripts/test/root.sh
     ./scripts/test/noroot.sh
 
     git add -A
