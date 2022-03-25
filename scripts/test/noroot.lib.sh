@@ -44,7 +44,7 @@ optimising() {
 }
 
 flags() {
-    export CXXFLAGS="$CXXFLAGS -D_KOS_VERSION_=\"0-testing\""
+    export CXXFLAGS="$CXXFLAGS -Wno-macro-redefined -D_KOS_VERSION_=\"0-testing\""
 
     log "Compiling default binary with CXXFLAGS = ${CXXFLAGS}"
     ./scripts/build.sh
