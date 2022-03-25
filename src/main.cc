@@ -1,12 +1,12 @@
 #include <iostream>
-#include <shadow.h>
-#include <unistd.h>
+#include <string>
 #include <cstring>
 #include <cerrno>
-#include <string>
 #include <termios.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <shadow.h>
 #include <pwd.h>
-#include <wait.h>
 #include <grp.h>
 
 #include "./config.h"
