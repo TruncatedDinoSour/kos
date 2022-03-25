@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 . scripts/test/root.lib.sh
 . scripts/test/config.sh
 

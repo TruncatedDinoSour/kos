@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 . scripts/test/noroot.lib.sh
 . scripts/test/config.sh
 
