@@ -1,3 +1,8 @@
+// -D_KOS_VERSION_="..."
+#ifndef _KOS_VERSION_
+#define _KOS_VERSION_ "(unknown)"
+#endif
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -26,6 +31,8 @@ int run_command(char *command[]);
 int get_group_count(void);
 int validate_group(void);
 int init(void);
+constexpr unsigned int sc(const char *str, int h);
+bool parse_arg(const char *arg);
 
 #ifdef HAVE_MODIFYENV
 int modify_env(const struct passwd *pw);
@@ -260,13 +267,35 @@ int init(void) {
     return EXIT_SUCCESS;
 }
 
+constexpr unsigned int sc(const char *str, int h = 0) {
+    return !str[h] ? 5381 : (sc(str, h + 1) * 33) ^ str[h];
+}
+
+bool parse_arg(const char *arg) {
+    if (!arg || arg[0] != '-')
+        return false;
+
+    switch (sc(arg)) {
+        case sc("--version"):
+            std::cout << "Kos version v" << _KOS_VERSION_ << '\n';
+            break;
+        default: log_error(std::string(arg) + ": flag not found"); exit(2);
+    }
+
+    return true;
+}
+
 // MAIN //
 
+#ifndef KOS_H
 int main(int argc, char *argv[]) {
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
-    ERRORIF_COND("Usage: <command> [args...]",
+    if (parse_arg(argv[1]))
+        return EXIT_SUCCESS;
+
+    ERRORIF_COND("Usage: <command|flag> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
 
     RETIF_FAIL((validate_password() != EXIT_SUCCESS));
@@ -279,3 +308,4 @@ int main(int argc, char *argv[]) {
     argv++;
     return run_command(argv);
 }
+#endif

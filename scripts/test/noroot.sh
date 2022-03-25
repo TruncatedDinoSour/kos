@@ -11,6 +11,9 @@ main() {
     log 'OPTIMISATION FLAGS'
     optimising
     optimising "$TEST_CMD"
+
+    log 'FLAGS'
+    flags
 }
 
 main "$@"

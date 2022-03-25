@@ -70,8 +70,10 @@ _If you are `root` you do not need to use `su`, just run commands directly_
 ### Building
 
 ```sh
-CXX=g++ ./scripts/build.sh  # Compiles with GCC instead of Clang (default)
+CXXFLAGS='-D_KOS_VERSION="1"' CXX=g++ ./scripts/build.sh  # Compiles with GCC instead of Clang (default)
 ```
+
+`CXXFLAGS='-D_KOS_VERSION="1"'` is important as it will define version argument
 
 ### Installing
 
@@ -197,3 +199,7 @@ Add this to /usr/bin/hostname and make it executable:
 ```sh
 su -c 'chmod 755 /usr/bin/hostname'
 ```
+
+# Using as a header
+
+Just define `KOS_H` before including the `main.cc` file

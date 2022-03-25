@@ -3,6 +3,7 @@
 COMPILERS=(g++ clang++)
 OPTIMISE_FLAGS=(-Os -O2 -O3 -Ofast -flto)
 CXXFLAGS="${CXXFLAGS:-}"
+FLAGS=(--version --testing-failing-flag)
 
 log() {
     echo -e " * $1" >&2
@@ -41,3 +42,19 @@ optimising() {
         compile "$1"
     done
 }
+
+flags() {
+    export CXXFLAGS="$CXXFLAGS -D_KOS_VERSION_=\"0-testing\""
+
+    log "Compiling default binary with CXXFLAGS = ${CXXFLAGS}"
+    ./scripts/build.sh
+
+    for flag in "${FLAGS[@]}"; do
+        log "Flag: $flag"
+
+        if ./kos "$flag"; then
+            [ "$flag" == "--testing-failing-flag" ] && continue
+        fi
+    done
+}
+

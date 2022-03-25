@@ -9,6 +9,8 @@ _kos() {
             local PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin
             _command_offset $cmd
             return
+        else
+            COMPREPLY=('--version')
         fi
     done
 } && complete -F _kos -o bashdefault -o default kos

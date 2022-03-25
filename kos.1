@@ -9,7 +9,14 @@ kos - a simple SUID tool
 .SH SYNOPSIS
 
 .B kos
-<\fIcommand\fR> [\fIargs...\fR]
+<\fIflag|command\fR> [\fIargs...\fR]
+
+
+.SH FLAGS
+
+.TP
+\fB--version\fR
+Print version and exit
 
 
 .SH AUTHOR
@@ -19,7 +26,7 @@ Written by Ari Archer <\fIari.web.xyz@gmail.com\fR>
 
 .SH "RETURN VALUE"
 
-Returns the exit code of the ran program
+Returns the exit code of the ran program or 1 on error and 2 on flag error
 
 
 .SH FILES
