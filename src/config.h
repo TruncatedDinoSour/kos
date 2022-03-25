@@ -33,3 +33,7 @@ const static char *MAIN_GROUP = "kos";
 /* Do you want to modify environment?
  * (Increases build size by ~39KB)*/
 #define HAVE_MODIFYENV
+
+/* Do you want argument support?
+ * (Increases build size by ~1.7KB)*/
+#define HAVE_ARG

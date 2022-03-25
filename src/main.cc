@@ -31,8 +31,11 @@ int run_command(char *command[]);
 int get_group_count(void);
 int validate_group(void);
 int init(void);
+
+#ifdef HAVE_ARG
 constexpr unsigned int sc(const char *str, int h);
 bool parse_arg(const char *arg);
+#endif
 
 #ifdef HAVE_MODIFYENV
 int modify_env(const struct passwd *pw);
@@ -267,6 +270,7 @@ int init(void) {
     return EXIT_SUCCESS;
 }
 
+#ifdef HAVE_ARG
 constexpr unsigned int sc(const char *str, int h = 0) {
     return !str[h] ? 5381 : (sc(str, h + 1) * 33) ^ str[h];
 }
@@ -284,6 +288,7 @@ bool parse_arg(const char *arg) {
 
     return true;
 }
+#endif
 
 // MAIN //
 
@@ -292,10 +297,16 @@ int main(int argc, char *argv[]) {
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
+#ifdef HAVE_ARG
+#define _help_arg "command|flag"
+
     if (parse_arg(argv[1]))
         return EXIT_SUCCESS;
+#else
+#define _help_arg "command"
+#endif
 
-    ERRORIF_COND("Usage: <command|flag> [args...]",
+    ERRORIF_COND("Usage: <" _help_arg "> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
 
     RETIF_FAIL((validate_password() != EXIT_SUCCESS));
