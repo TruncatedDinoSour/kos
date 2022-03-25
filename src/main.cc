@@ -15,6 +15,9 @@
 #include <unordered_map>
 #endif
 
+// VERSION //
+#define VERSION "v0.0.13"
+
 // FD //
 
 inline char *get_username(void);
@@ -263,6 +266,14 @@ int init(void) {
 // MAIN //
 
 int main(int argc, char *argv[]) {
+
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--version") {
+	    std::cout << "kos version " << VERSION << std::endl;
+	    return EXIT_SUCCESS;
+        }
+    }
+
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
