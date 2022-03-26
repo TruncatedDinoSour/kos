@@ -280,7 +280,7 @@ int modify_env(const struct passwd *pw) {
 
     for (const auto entry : env)
         ERRORIF_COND("Failed to modify environment: " + strerrno,
-                     setenv(entry.first, entry.second, 1));
+                     setenv(entry.first, entry.second, 1) == -1);
 
     return EXIT_SUCCESS;
 }
