@@ -14,8 +14,11 @@
 #include <pwd.h>
 #include <grp.h>
 
-#ifdef HAVE_VALIDATEPASS
+#ifdef HAVE_NOECHO
 #include <termios.h>
+#endif
+
+#ifdef HAVE_VALIDATEPASS
 #include <shadow.h>
 #endif
 
@@ -98,20 +101,25 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
      */
 
     std::string result;
+
+#ifdef HAVE_NOECHO
     struct termios term;
 
     tcgetattr(fileno(stdin), &term);
 
     term.c_lflag &= ~ECHO;
     tcsetattr(fileno(stdin), 0, &term);
+#endif
 
     std::cerr << '(' << prompt << ") ";
     std::getline(std::cin, result);
 
     std::cout << end;
 
+#ifdef HAVE_NOECHO
     term.c_lflag |= ECHO;
     tcsetattr(fileno(stdin), 0, &term);
+#endif
 
     return result;
 }

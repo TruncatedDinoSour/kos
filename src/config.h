@@ -45,3 +45,7 @@ const static char *MAIN_GROUP = "kos";
 /* Do you want to validate the password?
  * (Increases build size by ~6KB) */
 #define HAVE_VALIDATEPASS
+
+/* Do you want to disable echoing?
+ * (Increases build size by ~0.2KB) */
+#define HAVE_NOECHO
