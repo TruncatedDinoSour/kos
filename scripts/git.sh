@@ -3,11 +3,13 @@
 set -e
 
 main() {
-    ${__BASH_DOAS:-kos} ./scripts/test/root.sh
-    ./scripts/test/noroot.sh
+    if [ ! "$NO_TEST" ]; then
+        ${__BASH_DOAS:-kos} ./scripts/test/root.sh
+        ./scripts/test/noroot.sh
 
-    printf 'Press enter to continue'
-    read -r
+        printf 'Press enter to continue'
+        read -r
+    fi
 
     git add -A
     git commit -sam "${m:-"update @ $(date)"}"

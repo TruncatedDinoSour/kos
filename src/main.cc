@@ -104,11 +104,17 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 
 #ifdef HAVE_NOECHO
     struct termios term;
+    const int stdin_num = fileno(stdin);
 
-    tcgetattr(fileno(stdin), &term);
+    if (stdin_num == -1) {
+        log_error("Failed to fileno() of stdin: " + strerrno);
+        exit(3);
+    }
+
+    tcgetattr(stdin_num, &term);
 
     term.c_lflag &= ~ECHO;
-    tcsetattr(fileno(stdin), 0, &term);
+    tcsetattr(stdin_num, 0, &term);
 #endif
 
     std::cerr << '(' << prompt << ") ";
@@ -118,7 +124,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 
 #ifdef HAVE_NOECHO
     term.c_lflag |= ECHO;
-    tcsetattr(fileno(stdin), 0, &term);
+    tcsetattr(stdin_num, 0, &term);
 #endif
 
     return result;
