@@ -105,7 +105,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     term.c_lflag &= ~ECHO;
     tcsetattr(fileno(stdin), 0, &term);
 
-    std::cout << '(' << prompt << ") ";
+    std::cerr << '(' << prompt << ") ";
     std::getline(std::cin, result);
 
     std::cout << end;
