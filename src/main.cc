@@ -36,7 +36,10 @@ int init(void);
 
 #ifdef HAVE_VALIDATEPASS
 int validate_password(amm_t __times);
+
+#ifdef HAVE_NOECHO
 std::string input_no_echo(std::string prompt, char end);
+#endif
 #endif
 
 #ifdef HAVE_VALIDATEGRP
