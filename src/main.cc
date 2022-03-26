@@ -3,18 +3,21 @@
 #define _KOS_VERSION_ "(unknown)"
 #endif
 
+#include "./config.h"
+
 #include <iostream>
 #include <string>
 #include <cstring>
 #include <cerrno>
-#include <termios.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <shadow.h>
 #include <pwd.h>
 #include <grp.h>
 
-#include "./config.h"
+#ifdef HAVE_VALIDATEPASS
+#include <termios.h>
+#include <shadow.h>
+#endif
 
 #ifdef HAVE_MODIFYENV
 #include <unordered_map>
@@ -24,13 +27,19 @@
 
 inline char *get_username(void);
 inline bool is_passible_root(void);
+inline void log_error(const std::string emsg);
+int run_command(char *command[]);
+int init(void);
+
+#ifdef HAVE_VALIDATEPASS
 int validate_password(amm_t __times);
 std::string input_no_echo(std::string prompt, char end);
-inline void log_error(std::string emsg);
-int run_command(char *command[]);
+#endif
+
+#ifdef HAVE_VALIDATEGRP
 int get_group_count(void);
 int validate_group(void);
-int init(void);
+#endif
 
 #ifdef HAVE_ARG
 constexpr unsigned int sc(const char *str, int h);
@@ -69,6 +78,17 @@ inline char *get_username(void) {
     return pw ? pw->pw_name : NULL;
 }
 
+inline bool is_passible_root(void) {
+    // Returns true if user is already root
+    return getuid() == ROOT_UID && getgid() == ROOT_GID &&
+           geteuid() == ROOT_UID && SKIP_ROOT_AUTH;
+}
+
+inline void log_error(const std::string emsg) {
+    std::cerr << "ERROR: " << emsg << '\n';
+}
+
+#ifdef HAVE_VALIDATEPASS
 std::string input_no_echo(std::string prompt, char end = '\n') {
     /*
      * This function seems overcomplicated,
@@ -94,16 +114,6 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     tcsetattr(fileno(stdin), 0, &term);
 
     return result;
-}
-
-inline void log_error(std::string emsg) {
-    std::cerr << "ERROR: " << emsg << '\n';
-}
-
-inline bool is_passible_root(void) {
-    // Skips checking of password if the user is already root
-    return getuid() == ROOT_UID && getgid() == ROOT_GID &&
-           geteuid() == ROOT_UID && SKIP_ROOT_AUTH;
 }
 
 int validate_password(amm_t __times = 0) {
@@ -142,6 +152,7 @@ int validate_password(amm_t __times = 0) {
 
     return EXIT_SUCCESS;
 }
+#endif
 
 int run_command(char *command[]) {
     pid_t process = fork();
@@ -167,6 +178,7 @@ int run_command(char *command[]) {
     return EXIT_SUCCESS;
 }
 
+#ifdef HAVE_VALIDATEGRP
 int get_group_count(void) {
     struct passwd *pw;
     int ngroups = 0;
@@ -192,7 +204,9 @@ int get_group_count(void) {
 
     return ngroups;
 }
+#endif
 
+#ifdef HAVE_VALIDATEGRP
 int validate_group(void) {
     if (is_passible_root())
         return EXIT_SUCCESS;
@@ -238,6 +252,7 @@ int validate_group(void) {
                  !is_in_group);
     return EXIT_SUCCESS;
 }
+#endif
 
 #ifdef HAVE_MODIFYENV
 int modify_env(const struct passwd *pw) {
@@ -294,8 +309,10 @@ bool parse_arg(const char *arg) {
 
 #ifndef KOS_H
 int main(int argc, char *argv[]) {
+#ifdef HAVE_VALIDATEGRP
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
+#endif
 
 #ifdef HAVE_ARG
 #define _help_arg "command|flag"
@@ -309,7 +326,9 @@ int main(int argc, char *argv[]) {
     ERRORIF_COND("Usage: <" _help_arg "> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
 
+#ifdef HAVE_VALIDATEPASS
     RETIF_FAIL((validate_password() != EXIT_SUCCESS));
+#endif
 
     ERRORIF_COND("Set{g/u}id() failed: " + strerrno,
                  setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1);

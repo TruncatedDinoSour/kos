@@ -37,3 +37,11 @@ const static char *MAIN_GROUP = "kos";
 /* Do you want argument support?
  * (Increases build size by ~1.7KB)*/
 #define HAVE_ARG
+
+/* Do you want to validate groups?
+ * (Increases build size by ~5KB) */
+#define HAVE_VALIDATEGRP
+
+/* Do you want to validate the password?
+ * (Increases build size by ~6KB) */
+#define HAVE_VALIDATEPASS

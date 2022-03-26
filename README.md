@@ -203,3 +203,20 @@ su -c 'chmod 755 /usr/bin/hostname'
 # Using as a header
 
 Just define `KOS_H` before including the `main.cc` file
+
+# Inputting password from external sources
+
+`Kos` supports piping to STDIN so you can easily just
+pipe (`|`) the password to STDIN :)
+
+For example:
+
+```sh
+echo 'Top-secret-passw0rd' | kos id
+```
+
+Or even
+
+```sh
+printf '' | dmenu -l 0 -p 'Password: ' | kos id
+```
