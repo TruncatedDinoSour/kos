@@ -202,7 +202,7 @@ su -c 'chmod 755 /usr/bin/hostname'
 
 # Using as a header
 
-Just define `KOS_H` before including the `main.cc` file
+Just define `KOS_H` before including the `main.cpp` file
 
 # Inputting password from external sources
 
