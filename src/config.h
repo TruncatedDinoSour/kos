@@ -25,6 +25,10 @@ const static char *MAIN_GROUP = "kos";
 
 // NOTE: All build size increasions are with
 // no optimisations
+// Also:
+//   Increases in this context means:
+//      If you disable this option, output
+//      binary will be X smaller
 
 /* Do you want to inherit groups to root user?
  * (Increases build size by ~1KB) */
@@ -35,7 +39,7 @@ const static char *MAIN_GROUP = "kos";
 #define HAVE_MODIFYENV
 
 /* Do you want argument support?
- * (Increases build size by ~1.7KB)*/
+ * (Increases build size by ~2KB)*/
 #define HAVE_ARG
 
 /* Do you want to validate groups?
@@ -49,3 +53,7 @@ const static char *MAIN_GROUP = "kos";
 /* Do you want to disable echoing?
  * (Increases build size by ~0.2KB) */
 #define HAVE_NOECHO
+
+/* Do you want to have logging?
+ * (Increases build size by ~9KB) */
+#define HAVE_LOGGING

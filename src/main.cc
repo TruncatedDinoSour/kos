@@ -8,11 +8,14 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <cerrno>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+
+#ifdef HAVE_LOGGING
+#include <cerrno>
+#endif
 
 #ifdef HAVE_NOECHO
 #include <termios.h>
@@ -62,20 +65,39 @@ int modify_env(const struct passwd *pw);
     if (ret != EXIT_SUCCESS) \
         return EXIT_FAILURE;
 
+#ifdef HAVE_LOGGING
 #define ERRORIF_COND(emsg, cond) \
     if (cond) {                  \
         log_error(emsg);         \
         return EXIT_FAILURE;     \
     }
+#else
+#define ERRORIF_COND(emsg, cond) \
+    if (cond) {                  \
+        return EXIT_FAILURE;     \
+    }
+#endif
 
+#ifdef HAVE_LOGGING
 #define strerrno std::string(strerror(errno))
+#else
+#define strerrno std::string()
+#endif
 
+#ifdef HAVE_LOGGING
 #define _errorif_cln_grp(msg, cond) \
     if (cond) {                     \
         free(groups);               \
         log_error(msg);             \
         return EXIT_FAILURE;        \
     }
+#else
+#define _errorif_cln_grp(msg, cond) \
+    if (cond) {                     \
+        free(groups);               \
+        return EXIT_FAILURE;        \
+    }
+#endif
 
 // IMPL //
 
@@ -326,6 +348,11 @@ bool parse_arg(const char *arg) {
 
 #ifndef KOS_H
 int main(int argc, char *argv[]) {
+#ifndef HAVE_LOGGING
+    std::cout.rdbuf(nullptr);
+    std::cerr.rdbuf(nullptr);
+#endif
+
 #ifdef HAVE_VALIDATEGRP
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
