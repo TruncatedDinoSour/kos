@@ -35,3 +35,7 @@
 # Cache
 .ccls-cache/
 
+# Valgrind
+/valgrind.log
+*.out.*
+

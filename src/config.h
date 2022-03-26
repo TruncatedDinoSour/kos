@@ -23,6 +23,11 @@ const static short unsigned int SKIP_ROOT_AUTH = 1;
 /* Main kos group which all users have to be a part of when using kos */
 const static char *MAIN_GROUP = "kos";
 
+/* How many bytes to pre-allocate for groups (get_group_count())?
+ * https://docs.oracle.com/cd/E19082-01/820-0724/gfrbb/index.html
+ * /usr/include/bits/typesizes.h:40 */
+const static int PREALLOC_GROUP_BYTES = sizeof(unsigned int);
+
 // NOTE: All build size increasions are with
 // no optimisations
 // Also:

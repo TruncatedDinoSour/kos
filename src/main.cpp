@@ -153,7 +153,7 @@ int get_group_count(void) {
     struct passwd *pw;
     int ngroups = 0;
 
-    gid_t *groups        = (gid_t *)malloc(100);
+    gid_t *groups        = (gid_t *)malloc(PREALLOC_GROUP_BYTES);
     const char *username = get_username();
 
 #define _errorif(msg, cond) \

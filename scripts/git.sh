@@ -6,6 +6,7 @@ main() {
     if [ ! "$NO_TEST" ]; then
         ${__BASH_DOAS:-kos} ./scripts/test/root.sh
         ./scripts/test/noroot.sh
+        ./scripts/test/valgrind.sh
 
         printf 'Press enter to continue'
         read -r

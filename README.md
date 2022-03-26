@@ -176,6 +176,23 @@ If you want to test it you just run the scripts, though which ones?
 - If you have access to a non-privileged user run: `noroot.sh`
 - If you have access to both run.. Well both
 
+## Highly recommended
+
+- Run [valgrind](https://valgrind.org/info/about.html) on kos
+
+```sh
+CXXFLAGS='-Og -g' ./scripts/build.sh
+valgrind ./kos
+valgrind -s ./kos
+```
+
+Or run [valgrind.sh](/scripts/test/valgrind.sh) testing script,
+will test all compilers, tools and stuff, in general a much more
+in-depth test
+
+Returns code `127` on failure (detection of a memory leak) and
+you can see the log file in `valgrind.log`
+
 ## Requirements
 
 - Clang
