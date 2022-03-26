@@ -107,7 +107,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     const int stdin_num = fileno(stdin);
 
     if (stdin_num == -1) {
-        log_error("Failed to fileno() of stdin: " + strerrno);
+        log_error("fileno(stdin) failed: " + strerrno);
         exit(3);
     }
 
