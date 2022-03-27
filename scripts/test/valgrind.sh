@@ -8,7 +8,7 @@ main() {
     log_file="${LOGFILE:-valgrind.log}"
     tools=(memcheck cachegrind callgrind helgrind drd massif dhat lackey none exp-bbv)
 
-    base_cmd='valgrind --trace-children=yes --log-file=valgrind.log -v'
+    base_cmd='valgrind --trace-children=yes --log-file=valgrind.log --verbose --leak-check=full --show-leak-kinds=all --track-origins=yes'
     end_cmd="cat -- '$log_file' && head -n 1 -- '$log_file' && exit 127"
 
     for tool in "${tools[@]}"; do
