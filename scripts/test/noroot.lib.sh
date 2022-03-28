@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 COMPILERS=(g++ clang++)
-OPTIMISE_FLAGS=(-Os -O2 -O3 -Ofast -flto)
+OPTIMISE_FLAGS=(-Og -Os -O2 -O3 -Ofast -flto)
 CXXFLAGS="${CXXFLAGS:-}"
 FLAGS=(--version --testing-failing-flag)
 
