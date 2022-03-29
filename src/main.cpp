@@ -71,7 +71,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 #endif
 
     std::string result;
-    short int status = 0;
+    short int status = EXIT_SUCCESS;
 
 #ifdef HAVE_NOECHO
     struct termios term;
@@ -87,7 +87,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 
     std::cerr << '(' << prompt << ") ";
     if (!std::getline(std::cin, result))
-        status = 1;
+        status = EXIT_STDIN;
 
     std::cout << end;
 
@@ -98,7 +98,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     }
 #endif
 
-    if (status != 0)
+    if (status != EXIT_SUCCESS)
         exit(status);
 
     return result;
