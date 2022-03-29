@@ -29,11 +29,15 @@ const static char *MAIN_GROUP = "kos";
 const static int PREALLOC_GROUP_BYTES = sizeof(unsigned int);
 
 // NOTE: All build size increasions are with
-// no optimisations
+// no optimisations, no stripping or anything
 // Also:
 //   Increases in this context means:
 //      If you disable this option, output
 //      binary will be X smaller
+//
+//   Descreases in this context means:
+//      If you disable this option, output
+//      binary will be X larger
 
 /* Do you want to inherit groups to root user?
  * (Increases build size by ~1KB) */
@@ -62,3 +66,7 @@ const static int PREALLOC_GROUP_BYTES = sizeof(unsigned int);
 /* Do you want to have logging?
  * (Increases build size by ~9KB) */
 #define HAVE_LOGGING
+
+/* Allow piping of password?
+ * (Descreases the build size by ~0.04KB) */
+#define HAVE_PIPE

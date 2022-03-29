@@ -35,3 +35,6 @@
         return EXIT_FAILURE;        \
     }
 #endif
+
+#define EXIT_NOPIPE 4
+#define EXIT_STDIN 3

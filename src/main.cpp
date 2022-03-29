@@ -56,15 +56,25 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
      * echoing of STDIN in linux
      */
 
+    if (std::cin.eof())
+        exit(EXIT_FAILURE);
+
+    const int stdin_num = fileno(stdin);
+
+#ifndef HAVE_PIPE
+    if (!isatty(stdin_num))
+        exit(EXIT_NOPIPE);
+#endif
+
     std::string result;
+    short int status = 0;
 
 #ifdef HAVE_NOECHO
     struct termios term;
-    const int stdin_num = fileno(stdin);
 
     if (stdin_num == -1) {
         log_error("fileno(stdin) failed: " + strerrno);
-        exit(3);
+        exit(EXIT_STDIN);
     }
 
     tcgetattr(stdin_num, &term);
@@ -74,7 +84,8 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 #endif
 
     std::cerr << '(' << prompt << ") ";
-    std::getline(std::cin, result);
+    if (!std::getline(std::cin, result))
+        status = 1;
 
     std::cout << end;
 
@@ -82,6 +93,9 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     term.c_lflag |= ECHO;
     tcsetattr(stdin_num, 0, &term);
 #endif
+
+    if (status != 0)
+        exit(status);
 
     return result;
 }
