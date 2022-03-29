@@ -223,6 +223,8 @@ Just define `KOS_H` before including the `main.cpp` file
 
 # Inputting password from external sources
 
+**This section only applies if `HAVE_PIPE` is set**
+
 `Kos` supports piping to STDIN so you can easily just
 pipe (`|`) the password to STDIN :)
 
