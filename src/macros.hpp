@@ -49,6 +49,7 @@
     }
 #endif
 
-#define EXIT_NOPIPE 4
+#define EXIT_FLAG   2
 #define EXIT_STDIN  3
+#define EXIT_NOPIPE 4
 #define EXIT_TERM   5

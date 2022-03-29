@@ -286,7 +286,9 @@ bool parse_arg(const char *arg) {
         case sc("--version"):
             std::cout << "Kos version v" << _KOS_VERSION_ << '\n';
             break;
-        default: log_error(std::string(arg) + ": flag not found"); exit(2);
+        default:
+            log_error(std::string(arg) + ": flag not found");
+            exit(EXIT_FLAG);
     }
 
     return true;
