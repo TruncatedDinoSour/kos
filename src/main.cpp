@@ -71,7 +71,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 #endif
 
     std::string result;
-    unsigned short int status = EXIT_SUCCESS;
+    unsigned char status = EXIT_SUCCESS;
 
 #ifdef HAVE_NOECHO
     struct termios term;
