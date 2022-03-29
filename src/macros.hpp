@@ -36,5 +36,19 @@
     }
 #endif
 
+#ifdef HAVE_LOGGING
+#define EXITIF_COND(emsg, cond, ex) \
+    if (cond) {                     \
+        log_error(emsg);            \
+        exit(ex);                   \
+    }
+#else
+#define EXITIF_COND(emsg, cond, ex) \
+    if (cond) {                     \
+        exit(ex);                   \
+    }
+#endif
+
 #define EXIT_NOPIPE 4
-#define EXIT_STDIN 3
+#define EXIT_STDIN  3
+#define EXIT_TERM   5

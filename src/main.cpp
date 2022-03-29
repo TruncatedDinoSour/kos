@@ -60,9 +60,13 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
         exit(EXIT_FAILURE);
 
     const int stdin_num = fileno(stdin);
+    const bool piping   = !isatty(stdin_num);
+
+    EXITIF_COND("fileno(stdin) failed: " + strerrno, stdin_num == -1,
+                EXIT_STDIN);
 
 #ifndef HAVE_PIPE
-    if (!isatty(stdin_num))
+    if (piping)
         exit(EXIT_NOPIPE);
 #endif
 
@@ -72,15 +76,13 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
 #ifdef HAVE_NOECHO
     struct termios term;
 
-    if (stdin_num == -1) {
-        log_error("fileno(stdin) failed: " + strerrno);
-        exit(EXIT_STDIN);
+    if (!piping) {
+        EXITIF_COND("Failed to get tcgetattr(): " + strerrno,
+                    tcgetattr(stdin_num, &term), EXIT_TERM);
+
+        term.c_lflag &= ~ECHO;
+        tcsetattr(stdin_num, 0, &term);
     }
-
-    tcgetattr(stdin_num, &term);
-
-    term.c_lflag &= ~ECHO;
-    tcsetattr(stdin_num, 0, &term);
 #endif
 
     std::cerr << '(' << prompt << ") ";
@@ -90,8 +92,10 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     std::cout << end;
 
 #ifdef HAVE_NOECHO
-    term.c_lflag |= ECHO;
-    tcsetattr(stdin_num, 0, &term);
+    if (!piping) {
+        term.c_lflag |= ECHO;
+        tcsetattr(stdin_num, 0, &term);
+    }
 #endif
 
     if (status != 0)
