@@ -195,7 +195,7 @@ int get_group_count(void) {
 #endif
 
 #ifdef HAVE_VALIDATEGRP
-int validate_group(void) {
+unsigned char validate_group(void) {
     if (is_passible_root())
         return EXIT_SUCCESS;
 
@@ -243,7 +243,7 @@ int validate_group(void) {
 #endif
 
 #ifdef HAVE_MODIFYENV
-int modify_env(const struct passwd *pw) {
+unsigned char modify_env(const struct passwd *pw) {
     std::unordered_map<const char *, char *> env = {{"HOME", pw->pw_dir},
                                                     {"SHELL", pw->pw_shell},
                                                     {"USER", pw->pw_name},
@@ -257,7 +257,7 @@ int modify_env(const struct passwd *pw) {
 }
 #endif
 
-int init(void) {
+unsigned char init(void) {
     struct passwd *pw = getpwuid(ROOT_UID);
     ERRORIF_COND("Failed to getpwuid() in init(): " + strerrno, pw == NULL);
 

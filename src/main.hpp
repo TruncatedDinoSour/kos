@@ -2,7 +2,7 @@ inline char *get_username(void);
 inline bool is_passible_root(void);
 inline void log_error(const std::string emsg);
 int run_command(char *command[]);
-int init(void);
+unsigned char init(void);
 
 #ifdef HAVE_VALIDATEPASS
 int validate_password(amm_t __times);
@@ -14,7 +14,7 @@ std::string input_no_echo(std::string prompt, char end);
 
 #ifdef HAVE_VALIDATEGRP
 int get_group_count(void);
-int validate_group(void);
+unsigned char validate_group(void);
 #endif
 
 #ifdef HAVE_ARG
@@ -23,5 +23,5 @@ bool parse_arg(const char *arg);
 #endif
 
 #ifdef HAVE_MODIFYENV
-int modify_env(const struct passwd *pw);
+unsigned char modify_env(const struct passwd *pw);
 #endif
