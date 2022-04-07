@@ -293,15 +293,14 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_ARG
 #define _help_arg "command|flag"
+    if (parse_arg(argv[1]))
+        return EXIT_SUCCESS;
 #else
 #define _help_arg "command"
 #endif
 
     ERRORIF_COND("Failed to initialise /etc/passwd: " + strerrno, pw == NULL);
     ERRORIF_COND("Failed to get username: " + strerrno, username == NULL);
-
-    if (parse_arg(argv[1]))
-        return EXIT_SUCCESS;
 
     ERRORIF_COND("Usage: <" _help_arg "> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
