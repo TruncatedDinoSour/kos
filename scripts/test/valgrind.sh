@@ -3,12 +3,10 @@
 . scripts/test/noroot.lib.sh
 
 main() {
-    export __CXXFLAGS="${CXXFLAGS:-} -Og -g"
-
     log_file="${LOGFILE:-valgrind.log}"
     tools=(memcheck cachegrind callgrind helgrind drd massif dhat lackey none exp-bbv)
 
-    base_cmd='valgrind --trace-children=yes --log-file=valgrind.log --verbose'
+    base_cmd='valgrind --trace-children=yes --log-file=valgrind.log -s'
     end_cmd="cat -- '$log_file' && head -n 1 -- '$log_file' && exit 127"
 
     for tool in "${tools[@]}"; do
@@ -19,27 +17,24 @@ main() {
         cachegrind) opt='--branch-sim=yes' ;;
         drd) opt='--check-stack-var=yes --free-is-write=yes' ;;
         massif) opt='--stacks=yes' ;;
+        helgrind) opt='--free-is-write=yes' ;;
         *) opt='' ;;
         esac
 
-        cmd_1="$base_cmd $opt --tool='$tool' ./kos && $end_cmd"
-        cmd_2="$base_cmd $opt --tool='$tool' -s ./kos && $end_cmd"
+        cmd="$base_cmd $opt --tool='$tool' ./kos && $end_cmd"
 
-        for cmd in "$cmd_1" "$cmd_2"; do
-            log "Trying with command '$cmd'"
+        log "Trying with command '$cmd'"
 
-            export CXXFLAGS="$__CXXFLAGS"
-            rm -rf ./*.out.*
+        rm -rf ./*.out.*
 
-            log 'Compilation'
-            compile "$cmd"
+        log 'Compilation'
+        compile "$cmd"
 
-            log 'Optimisation flags'
-            optimising "$cmd"
+        log 'Optimisation flags'
+        optimising "$cmd"
 
-            log 'Command line arguments'
-            flags "$cmd"
-        done
+        log 'Command line arguments'
+        flags "$cmd"
 
         rm -rf ./*.out.*
     done

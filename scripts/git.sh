@@ -4,9 +4,7 @@ set -e
 
 main() {
     if [ ! "$NO_TEST" ]; then
-        ${__BASH_DOAS:-kos} ./scripts/test/root.sh
-        ./scripts/test/noroot.sh
-        ./scripts/test/valgrind.sh
+        ./scripts/test/full.sh
 
         printf 'Press enter to continue'
         read -r

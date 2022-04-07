@@ -1,4 +1,3 @@
-inline char *get_username(void);
 inline bool is_passible_root(void);
 inline void log_error(const std::string emsg);
 int run_command(char *command[]);
@@ -23,5 +22,5 @@ bool parse_arg(const char *arg);
 #endif
 
 #ifdef HAVE_MODIFYENV
-unsigned char modify_env(const struct passwd *pw);
+unsigned char modify_env(void);
 #endif

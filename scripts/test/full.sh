@@ -7,7 +7,7 @@ main() {
     ROOT_TESTS=(root)
 
     for root_test in "${ROOT_TESTS[@]}"; do
-        su -c "./scripts/test/$root_test.sh"
+        ${__BASH_RUNAS:-su -c} "./scripts/test/$root_test.sh"
     done
 
     for test_sc in "${TESTS[@]}"; do

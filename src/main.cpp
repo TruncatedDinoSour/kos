@@ -32,10 +32,8 @@
 #include "./macros.hpp"
 #include "./main.hpp"
 
-inline char *get_username(void) {
-    struct passwd *pw = getpwuid(getuid());
-    return pw ? pw->pw_name : NULL;
-}
+const static struct passwd *pw = getpwuid(getuid());
+const static char *username    = pw ? pw->pw_name : NULL;
 
 inline bool is_passible_root(void) {
     // Returns true if user is already root
@@ -120,20 +118,16 @@ int validate_password(amm_t __times = 0) {
                      " atempts",
                  __times >= PASSWORD_AMMOUNT && !INFINITE_ASK);
 
-    const char *username = get_username();
-
-    ERRORIF_COND("Failed to get username: " + strerrno, username == NULL);
-
-    struct spwd *pw;
+    struct spwd *spw;
 
     ERRORIF_COND("Failed to get shadow entry for `" + std::string(username) +
                      "`: " + strerror(errno),
-                 (pw = getspnam(username)) == NULL);
+                 (spw = getspnam(username)) == NULL);
 
     const std::string cleartext_password =
         input_no_echo("password for " + std::string(username));
 
-    if (strcmp(crypt(cleartext_password.c_str(), pw->sp_pwdp), pw->sp_pwdp)) {
+    if (strcmp(crypt(cleartext_password.c_str(), spw->sp_pwdp), spw->sp_pwdp)) {
         log_error("Access denied: Wrong password");
         return validate_password(__times + PASSWORD_AMMOUNT_INC);
     }
@@ -168,11 +162,9 @@ int run_command(char *command[]) {
 
 #ifdef HAVE_VALIDATEGRP
 int get_group_count(void) {
-    struct passwd *pw;
     int ngroups = 0;
 
-    gid_t *groups        = (gid_t *)malloc(PREALLOC_GROUP_BYTES);
-    const char *username = get_username();
+    gid_t *groups = (gid_t *)malloc(sizeof(gid_t *));
 
 #define _errorif(msg, cond) \
     if (cond) {             \
@@ -181,9 +173,6 @@ int get_group_count(void) {
     }
 
     _errorif("malloc(): " + strerrno, groups == NULL);
-
-    pw = getpwnam(username);
-    _errorif_cln_grp("getpwnam() failed: " + strerrno, pw == NULL);
 
     getgrouplist(username, pw->pw_gid, groups, &ngroups);
     free(groups);
@@ -199,11 +188,9 @@ unsigned char validate_group(void) {
     if (is_passible_root())
         return EXIT_SUCCESS;
 
-    const char *username = get_username();
-    int group_count      = get_group_count();
-    bool is_in_group     = false;
+    int group_count  = get_group_count();
+    bool is_in_group = false;
 
-    struct passwd *pw;
     struct group *mg;
 
 #define usr strerrno + ": for user " + username
@@ -213,10 +200,8 @@ unsigned char validate_group(void) {
     gid_t *groups = (gid_t *)malloc(sizeof(*groups) * group_count);
     ERRORIF_COND("malloc() failed in validate_group(): " + usr, groups == NULL);
 
-    pw = getpwnam(username);
-    _errorif_cln_grp("Failed to getpwnam(): " + usr, pw == NULL);
-
-    _errorif_cln_grp("Failed to get groups for user " + std::string(username),
+    _errorif_cln_grp("Failed to get groups for user " + std::string(username) +
+                         ": " + strerrno,
                      getgrouplist(username, pw->pw_gid, groups, &group_count) ==
                          -1);
 
@@ -224,12 +209,11 @@ unsigned char validate_group(void) {
     _errorif_cln_grp("Group `" + std::string(MAIN_GROUP) + "` does not exist",
                      mg == NULL);
 
-    for (int grp = 0; grp < group_count; ++grp) {
+    for (int grp = 0; grp < group_count; ++grp)
         if (groups[grp] == mg->gr_gid) {
             is_in_group = true;
             break;
         }
-    }
 
     free(groups);
 
@@ -243,7 +227,7 @@ unsigned char validate_group(void) {
 #endif
 
 #ifdef HAVE_MODIFYENV
-unsigned char modify_env(const struct passwd *pw) {
+unsigned char modify_env(void) {
     std::unordered_map<const char *, char *> env = {{"HOME", pw->pw_dir},
                                                     {"SHELL", pw->pw_shell},
                                                     {"USER", pw->pw_name},
@@ -258,16 +242,14 @@ unsigned char modify_env(const struct passwd *pw) {
 #endif
 
 unsigned char init(void) {
-    struct passwd *pw = getpwuid(ROOT_UID);
-    ERRORIF_COND("Failed to getpwuid() in init(): " + strerrno, pw == NULL);
-
 #ifdef HAVE_INITGROUP
-    ERRORIF_COND("Failed to initgroups(): " + strerrno,
+    ERRORIF_COND("Failed to initgroups() for " + std::string(username) + ": " +
+                     strerrno,
                  initgroups(pw->pw_name, pw->pw_gid) == -1);
 #endif
 
 #ifdef HAVE_MODIFYENV
-    RETIF_FAIL(modify_env(pw));
+    RETIF_FAIL(modify_env());
 #endif
 
     return EXIT_SUCCESS;
@@ -311,12 +293,15 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_ARG
 #define _help_arg "command|flag"
-
-    if (parse_arg(argv[1]))
-        return EXIT_SUCCESS;
 #else
 #define _help_arg "command"
 #endif
+
+    ERRORIF_COND("Failed to initialise /etc/passwd: " + strerrno, pw == NULL);
+    ERRORIF_COND("Failed to get username: " + strerrno, username == NULL);
+
+    if (parse_arg(argv[1]))
+        return EXIT_SUCCESS;
 
     ERRORIF_COND("Usage: <" _help_arg "> [args...]",
                  argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));

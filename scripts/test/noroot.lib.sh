@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 COMPILERS=(g++ clang++)
-OPTIMISE_FLAGS=(-Og -Os -O2 -O3 -Ofast -flto)
+OPTIMISE_FLAGS=(-O0 -Og -Os -O2 -O3 -Ofast -flto)
 CXXFLAGS="${CXXFLAGS:-}"
 FLAGS=(--version --testing-failing-flag)
 
@@ -44,7 +44,8 @@ optimising() {
 }
 
 flags() {
-    export CXXFLAGS="$CXXFLAGS -Wno-macro-redefined -D_KOS_VERSION_=\"0-testing\""
+    export USER_CXXFLAGS="$CXXFLAGS"
+    export CXXFLAGS="$USER_CXXFLAGS -Wno-macro-redefined -D_KOS_VERSION_=\"0-testing\""
 
     log "Compiling default binary with CXXFLAGS = ${CXXFLAGS}"
     ./scripts/build.sh
@@ -53,8 +54,14 @@ flags() {
         log "Flag: $flag"
 
         if ./kos "$flag"; then
-            [ "$flag" == "--testing-failing-flag" ] && continue
+            if [ "$flag" != "--testing-failing-flag" ]; then
+                continue
+            else
+                exit 127
+            fi
         fi
     done
+
+    export CXXFLAGS="$USER_CXXFLAGS"
 }
 
