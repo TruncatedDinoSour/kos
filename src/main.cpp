@@ -228,10 +228,15 @@ unsigned char validate_group(void) {
 
 #ifdef HAVE_MODIFYENV
 unsigned char modify_env(void) {
-    std::unordered_map<const char *, char *> env = {{"HOME", pw->pw_dir},
-                                                    {"SHELL", pw->pw_shell},
-                                                    {"USER", pw->pw_name},
-                                                    {"LOGNAME", pw->pw_name}};
+    const static struct passwd *rpw = getpwuid(ROOT_UID);
+
+    ERRORIF_COND("Modifying environment failed in getpwuid(): " + strerrno,
+                 rpw == NULL);
+
+    std::unordered_map<const char *, char *> env = {{"HOME", rpw->pw_dir},
+                                                    {"SHELL", rpw->pw_shell},
+                                                    {"USER", rpw->pw_name},
+                                                    {"LOGNAME", rpw->pw_name}};
 
     for (const auto entry : env)
         ERRORIF_COND("Failed to modify environment: " + strerrno,
