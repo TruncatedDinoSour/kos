@@ -78,7 +78,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
         EXITIF_COND("Failed to get tcgetattr(): " + strerrno,
                     tcgetattr(stdin_num, &term), EXIT_TERM);
 
-        term.c_lflag &= ~ECHO;
+        term.c_lflag &= (tcflag_t)~ECHO;
         tcsetattr(stdin_num, 0, &term);
     }
 #endif
@@ -197,7 +197,7 @@ unsigned char validate_group(void) {
 
     ERRORIF_COND("Failed to get the user group count", group_count == -1);
 
-    gid_t *groups = (gid_t *)malloc(sizeof(*groups) * group_count);
+    gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (long unsigned int)group_count);
     ERRORIF_COND("malloc() failed in validate_group(): " + usr, groups == NULL);
 
     _errorif_cln_grp("Failed to get groups for user " + std::string(username) +
@@ -262,7 +262,7 @@ unsigned char init(void) {
 
 #ifdef HAVE_ARG
 constexpr unsigned int sc(const char *str, int h = 0) {
-    return !str[h] ? 5381 : (sc(str, h + 1) * 33) ^ str[h];
+    return !str[h] ? 5381 : (sc(str, h + 1) * 33) ^ (unsigned int)str[h];
 }
 
 bool parse_arg(const char *arg) {
