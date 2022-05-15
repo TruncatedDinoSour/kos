@@ -162,7 +162,7 @@ int run_command(char *command[]) {
 
 #if defined HAVE_VALIDATEGRP || defined HAVE_INITGROUP
 int get_group_count(const char *user = username) {
-    static int ngroups = 0;
+    int ngroups = 0;
 
     gid_t *groups = (gid_t *)malloc(sizeof(gid_t *));
 
@@ -188,17 +188,17 @@ unsigned char validate_group(void) {
     if (is_passible_root())
         return EXIT_SUCCESS;
 
-    static int group_count = get_group_count();
-    bool is_in_group       = false;
+    static int group_count  = get_group_count();
+    static bool is_in_group = false;
 
-    struct group *mg;
+    static struct group *mg;
 
 #define usr strerrno + ": for user " + username
 
     ERRORIF_COND("Failed to get the user group count", group_count == -1);
 
-    gid_t *groups =
-        (gid_t *)malloc(sizeof(*groups) * (long unsigned int)group_count);
+    static gid_t *groups =
+        (gid_t *)malloc(sizeof(*groups) * (unsigned long int)group_count);
     ERRORIF_COND("malloc() failed in validate_group(): " + usr, groups == NULL);
 
     _errorif_cln_grp("Failed to get groups for user " + std::string(username) +
@@ -254,7 +254,7 @@ unsigned char init_groups(void) {
 
     ERRORIF_COND("Failed to get the root group count", gc == -1);
 
-    gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (long unsigned int)gc);
+    gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (unsigned long int)gc);
     ERRORIF_COND("malloc() failed in init_groups(): " + strerrno,
                  groups == NULL);
 
@@ -270,7 +270,6 @@ unsigned char init_groups(void) {
         }
 
     free(groups);
-
     return EXIT_SUCCESS;
 }
 #endif
