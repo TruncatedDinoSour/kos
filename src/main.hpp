@@ -11,9 +11,13 @@ std::string input_no_echo(std::string prompt, char end);
 #endif
 #endif
 
-#ifdef HAVE_VALIDATEGRP
-int get_group_count(void);
+#if defined HAVE_VALIDATEGRP || defined HAVE_INITGROUP
+int get_group_count(const char *user);
 unsigned char validate_group(void);
+#endif
+
+#ifdef HAVE_INITGROUP
+unsigned char init_groups(void);
 #endif
 
 #ifdef HAVE_ARG

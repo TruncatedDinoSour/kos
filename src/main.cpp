@@ -57,8 +57,8 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     if (std::cin.eof())
         exit(EXIT_FAILURE);
 
-    const int stdin_num = fileno(stdin);
-    const bool piping   = !isatty(stdin_num);
+    const static int stdin_num = fileno(stdin);
+    const static bool piping   = !isatty(stdin_num);
 
     EXITIF_COND("fileno(stdin) failed: " + strerrno, stdin_num == -1,
                 EXIT_STDIN);
@@ -68,11 +68,11 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
         exit(EXIT_NOPIPE);
 #endif
 
-    std::string result;
-    unsigned char status = EXIT_SUCCESS;
+    static std::string result;
+    static unsigned char status = EXIT_SUCCESS;
 
 #ifdef HAVE_NOECHO
-    struct termios term;
+    static struct termios term;
 
     if (!piping) {
         EXITIF_COND("Failed to get tcgetattr(): " + strerrno,
@@ -137,12 +137,12 @@ int validate_password(amm_t __times = 0) {
 #endif
 
 int run_command(char *command[]) {
-    pid_t process = fork();
+    static pid_t process = fork();
 
     ERRORIF_COND("Failed to fork(): " + strerrno,
                  process == -1) // Failed to fork child
     else if (process == 0) {    // Successfully forked child
-        int ret_code = 0;
+        static int ret_code = 0;
 
         ERRORIF_COND("Failed to execvp(): " + strerrno,
                      (ret_code = execvp(command[0], command)) < 0);
@@ -150,7 +150,7 @@ int run_command(char *command[]) {
         return ret_code;
     }
     else { // In parent process
-        int status;
+        static int status;
 
         ERRORIF_COND("Failed to waitpid(): " + strerrno,
                      waitpid(process, &status, 0) < 0)
@@ -160,9 +160,9 @@ int run_command(char *command[]) {
     return EXIT_SUCCESS;
 }
 
-#ifdef HAVE_VALIDATEGRP
-int get_group_count(void) {
-    int ngroups = 0;
+#if defined HAVE_VALIDATEGRP || defined HAVE_INITGROUP
+int get_group_count(const char *user = username) {
+    static int ngroups = 0;
 
     gid_t *groups = (gid_t *)malloc(sizeof(gid_t *));
 
@@ -174,7 +174,7 @@ int get_group_count(void) {
 
     _errorif("malloc(): " + strerrno, groups == NULL);
 
-    getgrouplist(username, pw->pw_gid, groups, &ngroups);
+    getgrouplist(user, pw->pw_gid, groups, &ngroups);
     free(groups);
 
 #undef _errorif
@@ -188,8 +188,8 @@ unsigned char validate_group(void) {
     if (is_passible_root())
         return EXIT_SUCCESS;
 
-    int group_count  = get_group_count();
-    bool is_in_group = false;
+    static int group_count = get_group_count();
+    bool is_in_group       = false;
 
     struct group *mg;
 
@@ -197,7 +197,8 @@ unsigned char validate_group(void) {
 
     ERRORIF_COND("Failed to get the user group count", group_count == -1);
 
-    gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (long unsigned int)group_count);
+    gid_t *groups =
+        (gid_t *)malloc(sizeof(*groups) * (long unsigned int)group_count);
     ERRORIF_COND("malloc() failed in validate_group(): " + usr, groups == NULL);
 
     _errorif_cln_grp("Failed to get groups for user " + std::string(username) +
@@ -209,7 +210,7 @@ unsigned char validate_group(void) {
     _errorif_cln_grp("Group `" + std::string(MAIN_GROUP) + "` does not exist",
                      mg == NULL);
 
-    for (int grp = 0; grp < group_count; ++grp)
+    for (static int grp = 0; grp < group_count; ++grp)
         if (groups[grp] == mg->gr_gid) {
             is_in_group = true;
             break;
@@ -246,11 +247,37 @@ unsigned char modify_env(void) {
 }
 #endif
 
+#ifdef HAVE_INITGROUP
+unsigned char init_groups(void) {
+    const static struct passwd *rpw = getpwuid(ROOT_UID);
+    static int gc                   = get_group_count(rpw->pw_name);
+
+    ERRORIF_COND("Failed to get the root group count", gc == -1);
+
+    gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (long unsigned int)gc);
+    ERRORIF_COND("malloc() failed in init_groups(): " + strerrno,
+                 groups == NULL);
+
+    _errorif_cln_grp("Failed to get groups for user " +
+                         std::string(rpw->pw_name) + ": " + strerrno,
+                     getgrouplist(username, pw->pw_gid, groups, &gc) == -1);
+
+    for (static int grp = 0; grp < gc; ++grp)
+        if (initgroups(pw->pw_name, groups[grp]) == -1) {
+            std::cerr << "Failed to initgroups() for " +
+                             std::string(rpw->pw_name) + ": " + strerrno;
+            break;
+        }
+
+    free(groups);
+
+    return EXIT_SUCCESS;
+}
+#endif
+
 unsigned char init(void) {
 #ifdef HAVE_INITGROUP
-    ERRORIF_COND("Failed to initgroups() for " + std::string(username) + ": " +
-                     strerrno,
-                 initgroups(pw->pw_name, pw->pw_gid) == -1);
+    RETIF_FAIL(init_groups())
 #endif
 
 #ifdef HAVE_MODIFYENV
