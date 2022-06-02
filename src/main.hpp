@@ -21,7 +21,7 @@ unsigned char init_groups(void);
 #endif
 
 #ifdef HAVE_ARG
-constexpr unsigned int sc(const char *str, int h);
+constexpr inline unsigned int sc(const char *str, int h);
 bool parse_arg(const char *arg);
 #endif
 

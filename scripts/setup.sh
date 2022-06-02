@@ -27,7 +27,8 @@ main() {
         install -Dm0644 kos.1 "$MANPREFIX"
         mandb -qf "${MANPREFIX}/kos.1"
     fi
+
+    [ "$INSTALL_BCOMP" ] && cp completions/kos.bash /usr/share/bash-completion/completions/kos
 }
 
 main "$@"
-

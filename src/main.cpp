@@ -287,7 +287,7 @@ unsigned char init(void) {
 }
 
 #ifdef HAVE_ARG
-constexpr unsigned int sc(const char *str, int h = 0) {
+constexpr inline unsigned int sc(const char *str, int h = 0) {
     return !str[h] ? 5381 : (sc(str, h + 1) * 33) ^ (unsigned int)str[h];
 }
 

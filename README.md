@@ -92,12 +92,21 @@ su -c 'install -Dm0644 kos.1 /usr/share/man/man1/kos.1'
 su -c 'mandb -qf /usr/share/man/man1/kos.1'
 ```
 
+### Completions
+
+#### Bash
+
+```sh
+su -c 'cp completions/kos.bash /usr/share/bash-completion/completions/kos'
+```
+
 ## Automated
 
 Before running the script you can optionally:
 
 - Set the `DO_STRIP` environment variable to strip the binary after compilation
 - Set the `INSTALL_MAN` environment variable to also install man page
+- Set the `INSTALL_BCOMP` environment variable to also install bash completion
 
 ```sh
 chmod a+rx ./scripts/setup.sh
