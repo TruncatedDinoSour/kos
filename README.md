@@ -9,10 +9,6 @@
 
 > A simple SUID tool written in C++
 
-<p align="center">
-    <img src="/logo/kos.png" alt="kos logo" width="50%"/>
-</p>
-
 # Requirements
 
 - Pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/

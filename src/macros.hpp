@@ -1,3 +1,5 @@
+#pragma once
+
 #define RETIF_FAIL(ret)      \
     if (ret != EXIT_SUCCESS) \
         return EXIT_FAILURE;

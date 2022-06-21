@@ -1,3 +1,5 @@
+#pragma once
+
 /* The type used to count times the password has been entered
  * NOTE: Change this if you go above the limit */
 typedef const short int amm_t;

@@ -1,3 +1,5 @@
+#pragma once
+
 inline bool is_passible_root(void);
 inline void log_error(const std::string emsg);
 int run_command(char *command[]);

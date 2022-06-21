@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 
-[ "$DEBUG" ] && set -x
-set -e
+set -xe
 
 main() {
     ${CXX:-clang++} ${CXXFLAGS} -std=c++11 \
