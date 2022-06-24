@@ -29,6 +29,7 @@ main() {
     fi
 
     [ "$INSTALL_BCOMP" ] && cp completions/kos.bash /usr/share/bash-completion/completions/kos
+    return 0
 }
 
 main "$@"
