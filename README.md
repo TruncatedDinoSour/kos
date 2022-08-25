@@ -14,6 +14,14 @@
 - Pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
 - Libxcrypt: https://github.com/besser82/libxcrypt
 
+# Why kos?
+
+- Very fast compilation times
+- Small amount of dependencies
+- GPLv3 License
+- Quite simple
+- Does not use PAM
+
 # Third party software support
 
 - [Bash completion](https://github.com/scop/bash-completion) (Install `completions/kos.bash` into `/usr/share/bash-completion/completions/kos`)
@@ -107,39 +115,6 @@ Before running the script you can optionally:
 ```sh
 chmod a+rx ./scripts/setup.sh
 su -c './scripts/setup.sh'
-```
-
-# Logic
-
-```
-Compile program linking the libxcrypt lib, then
-give it suid privelages using 4711 permissions,
-the program executable should also be owned by the root
-user and group, program should first check
-if a command is supplied as not to
-trigger any bugs, then we validate that the
-user is in a master, by default kos, group and if
-that passes we go on to validate the password using passwd
-struct for getting the username of current logged in user,
-getuid() for getting uid of current user and then getting
-/etc/shadow entry using <shadow.h> for that specific user
-after that we ask for the user to enter their password
-and we do not echo STDIN, we wait for the user to hit enter and then
-we hash the password using crypt() function of libxcrypt
-and compare it to pw->sp_pwdp where pw is the spwd struct
-which is the shadow entry of currently logged in user, if everything
-is okay return true, else return false, if it passes we continue
-and call setuid() and setgid(), we check if they fail,
-if no, continue, else notify the user, then we
-increment the argv pointer array to ignore argv[0] which
-is the program name and call run_command() on it,
-then in that function we fork the current process
-and check if it succeeded, if no we notify the user,
-else we contnue, if the currect process is in child we call
-execvp() and run the command, if in parent we waitpid() the
-child and get the exit code, which we return and then
-finally we just exit with the code the child process
-exited with
 ```
 
 # Note for packagers

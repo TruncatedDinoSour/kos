@@ -3,13 +3,12 @@
 inline bool is_passible_root(void);
 inline void log_error(const std::string emsg);
 int run_command(char *command[]);
-unsigned char init(void);
 
 #ifdef HAVE_VALIDATEPASS
 int validate_password(amm_t __times);
 
 #ifdef HAVE_NOECHO
-std::string input_no_echo(std::string prompt, char end);
+std::string input_no_echo(const std::string prompt);
 #endif
 #endif
 

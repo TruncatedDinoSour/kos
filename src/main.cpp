@@ -8,7 +8,6 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
@@ -32,8 +31,8 @@
 #include "./macros.hpp"
 #include "./main.hpp"
 
-const static struct passwd *pw = getpwuid(getuid());
-const static char *username    = pw ? pw->pw_name : NULL;
+static const struct passwd *pw = getpwuid(getuid());
+static const char *username    = pw ? pw->pw_name : NULL;
 
 inline bool is_passible_root(void) {
     // Returns true if user is already root
@@ -46,7 +45,7 @@ inline void log_error(const std::string emsg) {
 }
 
 #ifdef HAVE_VALIDATEPASS
-std::string input_no_echo(std::string prompt, char end = '\n') {
+std::string input_no_echo(const std::string prompt) {
     /*
      * This function seems overcomplicated,
      * so as a TODO I say we leave it here
@@ -57,8 +56,8 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     if (std::cin.eof())
         exit(EXIT_FAILURE);
 
-    const static int stdin_num = fileno(stdin);
-    const static bool piping   = !isatty(stdin_num);
+    static const int stdin_num = fileno(stdin);
+    static const bool piping   = !isatty(stdin_num);
 
     EXITIF_COND("fileno(stdin) failed: " + strerrno, stdin_num == -1,
                 EXIT_STDIN);
@@ -87,7 +86,7 @@ std::string input_no_echo(std::string prompt, char end = '\n') {
     if (!std::getline(std::cin, result))
         status = EXIT_STDIN;
 
-    std::cout << end;
+    std::cout << '\n';
 
 #ifdef HAVE_NOECHO
     if (!piping) {
@@ -137,25 +136,8 @@ int validate_password(amm_t __times = 0) {
 #endif
 
 int run_command(char *command[]) {
-    static pid_t process = fork();
-
-    ERRORIF_COND("Failed to fork(): " + strerrno,
-                 process == -1) // Failed to fork child
-    else if (process == 0) {    // Successfully forked child
-        static int ret_code = 0;
-
-        ERRORIF_COND("Failed to execvp(): " + strerrno,
-                     (ret_code = execvp(command[0], command)) < 0);
-
-        return ret_code;
-    }
-    else { // In parent process
-        static int status;
-
-        ERRORIF_COND("Failed to waitpid(): " + strerrno,
-                     waitpid(process, &status, 0) < 0)
-        else return WEXITSTATUS(status);
-    }
+    ERRORIF_COND("Failed to execvp(): " + strerrno,
+                 (execvp(command[0], command)) < 0);
 
     return EXIT_SUCCESS;
 }
@@ -229,7 +211,7 @@ unsigned char validate_group(void) {
 
 #ifdef HAVE_MODIFYENV
 unsigned char modify_env(void) {
-    const static struct passwd *rpw = getpwuid(ROOT_UID);
+    static const struct passwd *rpw = getpwuid(ROOT_UID);
 
     ERRORIF_COND("Modifying environment failed in getpwuid(): " + strerrno,
                  rpw == NULL);
@@ -249,7 +231,7 @@ unsigned char modify_env(void) {
 
 #ifdef HAVE_INITGROUP
 unsigned char init_groups(void) {
-    const static struct passwd *rpw = getpwuid(ROOT_UID);
+    static const struct passwd *rpw = getpwuid(ROOT_UID);
     static int gc                   = get_group_count(rpw->pw_name);
 
     ERRORIF_COND("Failed to get the root group count", gc == -1);
@@ -273,18 +255,6 @@ unsigned char init_groups(void) {
     return EXIT_SUCCESS;
 }
 #endif
-
-unsigned char init(void) {
-#ifdef HAVE_INITGROUP
-    RETIF_FAIL(init_groups())
-#endif
-
-#ifdef HAVE_MODIFYENV
-    RETIF_FAIL(modify_env());
-#endif
-
-    return EXIT_SUCCESS;
-}
 
 #ifdef HAVE_ARG
 constexpr inline unsigned int sc(const char *str, int h = 0) {
@@ -334,7 +304,7 @@ int main(int argc, char *argv[]) {
     ERRORIF_COND("Failed to get username: " + strerrno, username == NULL);
 
     ERRORIF_COND("Usage: <" _help_arg "> [args...]",
-                 argc < 2 || !argv[1][0] || std::isspace(argv[1][0]));
+                 argc < 2);
 
 #ifdef HAVE_VALIDATEPASS
     RETIF_FAIL((validate_password() != EXIT_SUCCESS));
@@ -343,7 +313,13 @@ int main(int argc, char *argv[]) {
     ERRORIF_COND("Set{g/u}id() failed: " + strerrno,
                  setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1);
 
-    RETIF_FAIL(init());
+#ifdef HAVE_INITGROUP
+    RETIF_FAIL(init_groups())
+#endif
+
+#ifdef HAVE_MODIFYENV
+    RETIF_FAIL(modify_env());
+#endif
 
     argv++;
     return run_command(argv);
