@@ -55,7 +55,7 @@ typedef const short int amm_t;
 /* The directory to store the remember files */
 static const char *REMEMBER_AUTH_DIR = "/var/kos/";
 
-/* Max size of a UID */
+/* Max length of a UID */
 static const amm_t UID_MAX = 16;
 
 /* Max grace period in seconds */
