@@ -28,16 +28,53 @@
 #include <unordered_map>
 #endif
 
+#ifdef HAVE_REMEMBERAUTH
+#include <sys/stat.h>
+#include <fstream>
+#endif
+
 #include "./macros.hpp"
 #include "./main.hpp"
 
 static const struct passwd *pw = getpwuid(getuid());
 static const char *username    = pw ? pw->pw_name : NULL;
 
+#ifdef HAVE_REMEMBERAUTH
+static bool temp_validate_user = false;
+static int temp_validate_user_id = getuid();
+#endif
+
 inline bool is_passible_root(void) {
-    // Returns true if user is already root
+    // Returns true if user is already root or is authenticated
+
+#ifdef HAVE_REMEMBERAUTH
+    static const int uid = getuid();
+    if (uid == ROOT_UID && getgid() == ROOT_GID && geteuid() == ROOT_UID &&
+        SKIP_ROOT_AUTH)
+        return true;
+
+    if (access(REMEMBER_AUTH_DIR, W_OK) == 0 ||
+        access(REMEMBER_AUTH_DIR, R_OK) != 0) {
+        if (access(REMEMBER_AUTH_DIR, F_OK) == 0) {
+            std::cerr << "FATAL: Authentication failed, reason being that the "
+                         "REMEMBER_AUTH_DIR is invalid"
+                      << '\n';
+            exit(EXIT_AUTH);
+        }
+
+        return false;
+    }
+
+    static char uid_str[UID_MAX] = {0};
+    snprintf(uid_str, UID_MAX, "%d", uid);
+
+    return access((std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str))
+                      .c_str(),
+                  F_OK) == 0;
+#else
     return getuid() == ROOT_UID && getgid() == ROOT_GID &&
            geteuid() == ROOT_UID && SKIP_ROOT_AUTH;
+#endif
 }
 
 inline void log_error(const std::string emsg) {
@@ -131,11 +168,37 @@ int validate_password(amm_t __times = 0) {
         return validate_password(__times + PASSWORD_AMMOUNT_INC);
     }
 
+#ifdef HAVE_REMEMBERAUTH
+    temp_validate_user = true;
+    temp_validate_user_id = getuid();
+#endif
+
     return EXIT_SUCCESS;
 }
 #endif
 
 int run_command(char *command[]) {
+#ifdef HAVE_REMEMBERAUTH
+    static char uid_str[UID_MAX] = {0};
+    snprintf(uid_str, UID_MAX, "%d", temp_validate_user_id);
+    std::string verpath = std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str);
+
+    struct stat t_stat;
+
+    if (stat(verpath.c_str(), &t_stat) != -1) {
+        if ((time(NULL) - t_stat.st_mtime) >  GRACE_TIME)
+            remove(verpath.c_str());
+    }
+
+    if (temp_validate_user) {
+        if (access(REMEMBER_AUTH_DIR, F_OK) != 0)
+            mkdir(REMEMBER_AUTH_DIR, 0755);
+
+        std::ofstream(verpath).close();
+        temp_validate_user = false;
+    }
+#endif
+
     ERRORIF_COND("Failed to execvp(): " + strerrno,
                  (execvp(command[0], command)) < 0);
 
@@ -303,8 +366,7 @@ int main(int argc, char *argv[]) {
     ERRORIF_COND("Failed to initialise /etc/passwd: " + strerrno, pw == NULL);
     ERRORIF_COND("Failed to get username: " + strerrno, username == NULL);
 
-    ERRORIF_COND("Usage: <" _help_arg "> [args...]",
-                 argc < 2);
+    ERRORIF_COND("Usage: <" _help_arg "> [args...]", argc < 2);
 
 #ifdef HAVE_VALIDATEPASS
     RETIF_FAIL((validate_password() != EXIT_SUCCESS));

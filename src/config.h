@@ -4,28 +4,6 @@
  * NOTE: Change this if you go above the limit */
 typedef const short int amm_t;
 
-/* What is root user ID? */
-const static unsigned char ROOT_UID = 0;
-
-/* What is root group ID? */
-const static unsigned char ROOT_GID = 0;
-
-/* Should kos infinitely ask for a password? */
-const static unsigned char INFINITE_ASK = 0;
-
-/* The valid ammount of times password should be entered */
-static amm_t PASSWORD_AMMOUNT = 3;
-
-/* Increment ammount for PASSWORD_AMMOUNT */
-static amm_t PASSWORD_AMMOUNT_INC = 1;
-
-/* Should kos skip checking authentication if the user is the user is already
- * root? */
-const static unsigned char SKIP_ROOT_AUTH = 1;
-
-/* Main kos group which all users have to be a part of when using kos */
-const static char *MAIN_GROUP = "kos";
-
 // NOTE: All build size increasions are with
 // no optimisations, no stripping or anything
 // Also:
@@ -66,5 +44,42 @@ const static char *MAIN_GROUP = "kos";
 #define HAVE_LOGGING
 
 /* Allow piping of password?
- * (Descreases the build size by ~0.04KB) */
+ * (Decreases the build size by ~0.04KB) */
 #define HAVE_PIPE
+
+/* Remember authentication?
+ * (Increases the build size by ~1KB) */
+#define HAVE_REMEMBERAUTH
+
+#ifdef HAVE_REMEMBERAUTH
+/* The directory to store the remember files */
+static const char *REMEMBER_AUTH_DIR = "/var/kos/";
+
+/* Max size of a UID */
+static const amm_t UID_MAX = 16;
+
+/* Max grace period in seconds */
+static const amm_t GRACE_TIME = 300;
+#endif
+
+/* What is root user ID? */
+static const unsigned char ROOT_UID = 0;
+
+/* What is root group ID? */
+static const unsigned char ROOT_GID = 0;
+
+/* Should kos infinitely ask for a password? */
+static const unsigned char INFINITE_ASK = 0;
+
+/* The valid ammount of times password should be entered */
+static amm_t PASSWORD_AMMOUNT = 3;
+
+/* Increment ammount for PASSWORD_AMMOUNT */
+static amm_t PASSWORD_AMMOUNT_INC = 1;
+
+/* Should kos skip checking authentication if the user is the user is already
+ * root? */
+static const unsigned char SKIP_ROOT_AUTH = 1;
+
+/* Main kos group which all users have to be a part of when using kos */
+static const char *MAIN_GROUP = "kos";
