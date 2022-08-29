@@ -40,15 +40,15 @@ static const struct passwd *pw = getpwuid(getuid());
 static const char *username    = pw ? pw->pw_name : NULL;
 
 #ifdef HAVE_REMEMBERAUTH
-static bool temp_validate_user = false;
-static int temp_validate_user_id = getuid();
+static bool temp_validate_user     = false;
+static uid_t temp_validate_user_id = getuid();
 #endif
 
 inline bool is_passible_root(void) {
     // Returns true if user is already root or is authenticated
 
 #ifdef HAVE_REMEMBERAUTH
-    static const int uid = getuid();
+    static const uid_t uid = getuid();
     if (uid == ROOT_UID && getgid() == ROOT_GID && geteuid() == ROOT_UID &&
         SKIP_ROOT_AUTH)
         return true;
@@ -169,7 +169,7 @@ int validate_password(amm_t __times = 0) {
     }
 
 #ifdef HAVE_REMEMBERAUTH
-    temp_validate_user = true;
+    temp_validate_user    = true;
     temp_validate_user_id = getuid();
 #endif
 
@@ -181,12 +181,13 @@ int run_command(char *command[]) {
 #ifdef HAVE_REMEMBERAUTH
     static char uid_str[UID_MAX] = {0};
     snprintf(uid_str, UID_MAX, "%d", temp_validate_user_id);
-    std::string verpath = std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str);
+    std::string verpath =
+        std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str);
 
     struct stat t_stat;
 
     if (stat(verpath.c_str(), &t_stat) != -1) {
-        if ((time(NULL) - t_stat.st_mtime) >  GRACE_TIME)
+        if ((time(NULL) - t_stat.st_mtime) > GRACE_TIME)
             remove(verpath.c_str());
     }
 
