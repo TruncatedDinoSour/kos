@@ -48,9 +48,10 @@ inline bool is_passible_root(void) {
     // Returns true if user is already root or is authenticated
 
 #ifdef HAVE_REMEMBERAUTH
-    static const uid_t uid = getuid();
-    if (uid == ROOT_UID && getgid() == ROOT_GID && geteuid() == ROOT_UID &&
-        SKIP_ROOT_AUTH)
+    VER_CHECK_TIME_STAT(return false);
+
+    if (temp_validate_user_id == ROOT_UID && getgid() == ROOT_GID &&
+        geteuid() == ROOT_UID && SKIP_ROOT_AUTH)
         return true;
 
     if (access(REMEMBER_AUTH_DIR, W_OK) == 0 ||
@@ -65,12 +66,7 @@ inline bool is_passible_root(void) {
         return false;
     }
 
-    static char uid_str[UID_MAX] = {0};
-    snprintf(uid_str, UID_MAX, "%d", uid);
-
-    return access((std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str))
-                      .c_str(),
-                  F_OK) == 0;
+    return access(verpath.c_str(), F_OK) == 0;
 #else
     return getuid() == ROOT_UID && getgid() == ROOT_GID &&
            geteuid() == ROOT_UID && SKIP_ROOT_AUTH;
@@ -179,17 +175,7 @@ int validate_password(amm_t __times = 0) {
 
 int run_command(char *command[]) {
 #ifdef HAVE_REMEMBERAUTH
-    static char uid_str[UID_MAX] = {0};
-    snprintf(uid_str, UID_MAX, "%d", temp_validate_user_id);
-    std::string verpath =
-        std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str);
-
-    struct stat t_stat;
-
-    if (stat(verpath.c_str(), &t_stat) != -1) {
-        if ((time(NULL) - t_stat.st_mtime) > GRACE_TIME)
-            remove(verpath.c_str());
-    }
+    VER_CHECK_TIME_STAT(remove(verpath.c_str()));
 
     if (temp_validate_user) {
         if (access(REMEMBER_AUTH_DIR, F_OK) != 0)

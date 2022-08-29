@@ -51,6 +51,19 @@
     }
 #endif
 
+#ifdef HAVE_REMEMBERAUTH
+#define VER_CHECK_TIME_STAT(code)                                    \
+    static char uid_str[UID_MAX] = {0};                              \
+    snprintf(uid_str, UID_MAX, "%d", temp_validate_user_id);         \
+    std::string verpath =                                            \
+        std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str); \
+    struct stat t_stat;                                              \
+    if (stat(verpath.c_str(), &t_stat) != -1) {                      \
+        if ((time(NULL) - t_stat.st_mtime) > GRACE_TIME)             \
+            code;                                                    \
+    }
+#endif
+
 #define EXIT_FLAG   2
 #define EXIT_STDIN  3
 #define EXIT_NOPIPE 4
