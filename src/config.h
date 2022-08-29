@@ -59,7 +59,7 @@ static const char *REMEMBER_AUTH_DIR = "/var/kos/";
 static const amm_t UID_MAX = 16;
 
 /* Max grace period in seconds */
-static const amm_t GRACE_TIME = 10;
+static const amm_t GRACE_TIME = 300;
 #endif
 
 /* What is root user ID? */
