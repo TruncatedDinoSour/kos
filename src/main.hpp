@@ -14,7 +14,12 @@ int run_command(char *command[]);
 int validate_password(amm_t __times);
 
 #ifdef HAVE_NOECHO
+#ifdef HAVE_LOGGING
 std::string input_no_echo(const std::string prompt);
+#else
+std::string internal_input_no_echo(void);
+#define input_no_echo(prompt) internal_input_no_echo();
+#endif
 #endif
 #endif
 

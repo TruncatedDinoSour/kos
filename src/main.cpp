@@ -82,16 +82,17 @@ inline void log_error(const std::string emsg) {
 #endif
 
 #ifdef HAVE_VALIDATEPASS
+#ifdef HAVE_LOGGING
 std::string input_no_echo(const std::string prompt) {
+#else
+std::string internal_input_no_echo(void) {
+#endif
     /*
      * This function seems overcomplicated,
      * so as a TODO I say we leave it here
      * until we find another way to disable
      * echoing of STDIN in linux
      */
-#ifndef HAVE_LOGGING
-    (void)prompt;
-#endif
 
     if (std::cin.eof())
         exit(EXIT_FAILURE);
