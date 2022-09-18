@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
@@ -24,10 +25,6 @@
 #include <shadow.h>
 #endif
 
-#ifdef HAVE_MODIFYENV
-#include <unordered_map>
-#endif
-
 #ifdef HAVE_REMEMBERAUTH
 #include <sys/stat.h>
 #include <fstream>
@@ -36,12 +33,15 @@
 #include "./macros.hpp"
 #include "./main.hpp"
 
+#if defined HAVE_VALIDATEPASS || defined HAVE_VALIDATEGRP || \
+    defined HAVE_INITGROUP
 static const struct passwd *pw = getpwuid(getuid());
 static const char *username    = pw ? pw->pw_name : NULL;
+#endif
 
 #ifdef HAVE_REMEMBERAUTH
-static bool temp_validate_user     = false;
-static uid_t temp_validate_user_id = getuid();
+static volatile bool temp_validate_user     = false;
+static volatile uid_t temp_validate_user_id = getuid();
 #endif
 
 inline bool is_passible_root(void) {
@@ -57,9 +57,11 @@ inline bool is_passible_root(void) {
     if (access(REMEMBER_AUTH_DIR, W_OK) == 0 ||
         access(REMEMBER_AUTH_DIR, R_OK) != 0) {
         if (access(REMEMBER_AUTH_DIR, F_OK) == 0) {
-            std::cerr << "FATAL: Authentication failed, reason being that the "
-                         "REMEMBER_AUTH_DIR is invalid"
-                      << '\n';
+            EXIF_LOGGING(
+                std::cerr
+                << "FATAL: Authentication failed, reason being that the "
+                   "REMEMBER_AUTH_DIR is invalid"
+                << '\n');
             exit(EXIT_AUTH);
         }
 
@@ -73,9 +75,11 @@ inline bool is_passible_root(void) {
 #endif
 }
 
+#ifdef HAVE_LOGGING
 inline void log_error(const std::string emsg) {
     std::cerr << "ERROR: " << emsg << '\n';
 }
+#endif
 
 #ifdef HAVE_VALIDATEPASS
 std::string input_no_echo(const std::string prompt) {
@@ -85,15 +89,19 @@ std::string input_no_echo(const std::string prompt) {
      * until we find another way to disable
      * echoing of STDIN in linux
      */
+#ifndef HAVE_LOGGING
+    (void)prompt;
+#endif
 
     if (std::cin.eof())
         exit(EXIT_FAILURE);
 
-    static const int stdin_num = fileno(stdin);
+    static const int stdin_num = STDIN_FILENO;
     static const bool piping   = !isatty(stdin_num);
 
-    EXITIF_COND("fileno(stdin) failed: " + strerrno, stdin_num == -1,
-                EXIT_STDIN);
+#ifdef _STDIN_FILENO_FILENO_FN
+    EXITIF_COND(WSTRERRNO("fileno(stdin) failed"), stdin_num == -1, EXIT_STDIN);
+#endif
 
 #ifndef HAVE_PIPE
     if (piping)
@@ -107,7 +115,7 @@ std::string input_no_echo(const std::string prompt) {
     static struct termios term;
 
     if (!piping) {
-        EXITIF_COND("Failed to get tcgetattr(): " + strerrno,
+        EXITIF_COND(WSTRERRNO("Failed to get tcgetattr()"),
                     tcgetattr(stdin_num, &term), EXIT_TERM);
 
         term.c_lflag &= (tcflag_t)~ECHO;
@@ -115,11 +123,11 @@ std::string input_no_echo(const std::string prompt) {
     }
 #endif
 
-    std::cerr << '(' << prompt << ") ";
+    EXIF_LOGGING(std::cerr << '(' << prompt << ") ");
     if (!std::getline(std::cin, result))
         status = EXIT_STDIN;
 
-    std::cout << '\n';
+    EXIF_LOGGING(std::cout << '\n');
 
 #ifdef HAVE_NOECHO
     if (!piping) {
@@ -146,9 +154,11 @@ int validate_password(amm_t __times = 0) {
                      "), will not proceed further",
                  __times < 0);
 
+#ifndef HAVE_INFINITE_ASK
     ERRORIF_COND("Failed to log in after " + std::to_string(__times) +
                      " atempts",
-                 __times >= PASSWORD_AMMOUNT && !INFINITE_ASK);
+                 __times >= PASSWORD_AMMOUNT);
+#endif
 
     struct spwd *spw;
 
@@ -186,7 +196,7 @@ int run_command(char *command[]) {
     }
 #endif
 
-    ERRORIF_COND("Failed to execvp(): " + strerrno,
+    ERRORIF_COND(WSTRERRNO("Failed to execvp()"),
                  (execvp(command[0], command)) < 0);
 
     return EXIT_SUCCESS;
@@ -195,21 +205,7 @@ int run_command(char *command[]) {
 #if defined HAVE_VALIDATEGRP || defined HAVE_INITGROUP
 int get_group_count(const char *user = username) {
     int ngroups = 0;
-
-    gid_t *groups = (gid_t *)malloc(sizeof(gid_t *));
-
-#define _errorif(msg, cond) \
-    if (cond) {             \
-        log_error(msg);     \
-        return -1;          \
-    }
-
-    _errorif("malloc(): " + strerrno, groups == NULL);
-
-    getgrouplist(user, pw->pw_gid, groups, &ngroups);
-    free(groups);
-
-#undef _errorif
+    getgrouplist(user, pw->pw_gid, NULL, &ngroups);
 
     return ngroups;
 }
@@ -225,24 +221,24 @@ unsigned char validate_group(void) {
 
     static struct group *mg;
 
-#define usr strerrno + ": for user " + username
+#define usr std::string(strerror(errno)) + ": for user " + username
 
     ERRORIF_COND("Failed to get the user group count", group_count == -1);
 
     static gid_t *groups =
         (gid_t *)malloc(sizeof(*groups) * (unsigned long int)group_count);
+
     ERRORIF_COND("malloc() failed in validate_group(): " + usr, groups == NULL);
 
-    _errorif_cln_grp("Failed to get groups for user " + std::string(username) +
-                         ": " + strerrno,
-                     getgrouplist(username, pw->pw_gid, groups, &group_count) ==
-                         -1);
+    _errorif_cln_grp(
+        WSTRERRNO("Failed to get groups for user " + std::string(username)),
+        getgrouplist(username, pw->pw_gid, groups, &group_count) == -1);
 
     mg = getgrnam(MAIN_GROUP);
     _errorif_cln_grp("Group `" + std::string(MAIN_GROUP) + "` does not exist",
                      mg == NULL);
 
-    for (static int grp = 0; grp < group_count; ++grp)
+    for (static volatile int grp = 0; grp < group_count; ++grp)
         if (groups[grp] == mg->gr_gid) {
             is_in_group = true;
             break;
@@ -263,17 +259,17 @@ unsigned char validate_group(void) {
 unsigned char modify_env(void) {
     static const struct passwd *rpw = getpwuid(ROOT_UID);
 
-    ERRORIF_COND("Modifying environment failed in getpwuid(): " + strerrno,
+    ERRORIF_COND(WSTRERRNO("Modifying environment failed in getpwuid()"),
                  rpw == NULL);
 
-    std::unordered_map<const char *, char *> env = {{"HOME", rpw->pw_dir},
-                                                    {"SHELL", rpw->pw_shell},
-                                                    {"USER", rpw->pw_name},
-                                                    {"LOGNAME", rpw->pw_name}};
+    const char *env[ENV_AMMOUNT][2] = {{"HOME", rpw->pw_dir},
+                                       {"SHELL", rpw->pw_shell},
+                                       {"USER", rpw->pw_name},
+                                       {"LOGNAME", rpw->pw_name}};
 
-    for (const auto entry : env)
-        ERRORIF_COND("Failed to modify environment: " + strerrno,
-                     setenv(entry.first, entry.second, 1) == -1);
+    for (static volatile unsigned int idx = 0; idx < ENV_AMMOUNT; ++idx)
+        ERRORIF_COND(WSTRERRNO("Failed to modify environment: "),
+                     setenv(env[idx][0], env[idx][1], 1) == -1);
 
     return EXIT_SUCCESS;
 }
@@ -287,17 +283,16 @@ unsigned char init_groups(void) {
     ERRORIF_COND("Failed to get the root group count", gc == -1);
 
     gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (unsigned long int)gc);
-    ERRORIF_COND("malloc() failed in init_groups(): " + strerrno,
-                 groups == NULL);
+    ERRORIF_COND(WSTRERRNO("malloc() failed in init_groups()"), groups == NULL);
 
-    _errorif_cln_grp("Failed to get groups for user " +
-                         std::string(rpw->pw_name) + ": " + strerrno,
-                     getgrouplist(username, pw->pw_gid, groups, &gc) == -1);
+    _errorif_cln_grp(
+        WSTRERRNO("Failed to get groups for user " + std::string(rpw->pw_name)),
+        getgrouplist(username, pw->pw_gid, groups, &gc) == -1);
 
-    for (static int grp = 0; grp < gc; ++grp)
+    for (static volatile int grp = 0; grp < gc; ++grp)
         if (initgroups(pw->pw_name, groups[grp]) == -1) {
-            std::cerr << "Failed to initgroups() for " +
-                             std::string(rpw->pw_name) + ": " + strerrno;
+            EXIF_LOGGING(std::cerr << WSTRERRNO("Failed to initgroups() for " +
+                                                std::string(rpw->pw_name)));
             break;
         }
 
@@ -317,7 +312,7 @@ bool parse_arg(const char *arg) {
 
     switch (sc(arg)) {
         case sc("--version"):
-            std::cout << "Kos version v" << _KOS_VERSION_ << '\n';
+            EXIF_LOGGING(std::cout << "Kos version v" << _KOS_VERSION_ << '\n');
             break;
         default:
             log_error(std::string(arg) + ": flag not found");
@@ -332,11 +327,6 @@ bool parse_arg(const char *arg) {
 
 #ifndef KOS_H
 int main(int argc, char *argv[]) {
-#ifndef HAVE_LOGGING
-    std::cout.rdbuf(nullptr);
-    std::cerr.rdbuf(nullptr);
-#endif
-
 #ifdef HAVE_VALIDATEGRP
     if (validate_group() != EXIT_SUCCESS)
         return EXIT_FAILURE;
@@ -350,16 +340,19 @@ int main(int argc, char *argv[]) {
 #define _help_arg "command"
 #endif
 
-    ERRORIF_COND("Failed to initialise /etc/passwd: " + strerrno, pw == NULL);
-    ERRORIF_COND("Failed to get username: " + strerrno, username == NULL);
+#if defined HAVE_VALIDATEPASS || defined HAVE_VALIDATEGRP || \
+    defined HAVE_INITGROUP
+    ERRORIF_COND(WSTRERRNO("Failed to initialise /etc/passwd"), pw == NULL);
+    ERRORIF_COND(WSTRERRNO("Failed to get username"), username == NULL);
+#endif
 
     ERRORIF_COND("Usage: <" _help_arg "> [args...]", argc < 2);
 
 #ifdef HAVE_VALIDATEPASS
-    RETIF_FAIL((validate_password() != EXIT_SUCCESS));
+    RETIF_FAIL(validate_password() != EXIT_SUCCESS);
 #endif
 
-    ERRORIF_COND("Set{g/u}id() failed: " + strerrno,
+    ERRORIF_COND(WSTRERRNO("Set{g/u}id() failed: "),
                  setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1);
 
 #ifdef HAVE_INITGROUP

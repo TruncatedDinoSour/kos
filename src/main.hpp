@@ -1,7 +1,13 @@
 #pragma once
 
 inline bool is_passible_root(void);
+
+#ifdef HAVE_LOGGING
 inline void log_error(const std::string emsg);
+#else
+#define log_error(msg)
+#endif
+
 int run_command(char *command[]);
 
 #ifdef HAVE_VALIDATEPASS

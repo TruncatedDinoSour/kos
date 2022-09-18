@@ -4,82 +4,97 @@
  * NOTE: Change this if you go above the limit */
 typedef const short int amm_t;
 
-// NOTE: All build size increasions are with
-// no optimisations, no stripping or anything
-// Also:
-//   Increases in this context means:
-//      If you disable this option, output
-//      binary will be X smaller
-//
-//   Descreases in this context means:
-//      If you disable this option, output
-//      binary will be X larger
+/* C Bool */
+typedef unsigned char CBool;
+
+/* Extremely small uint */
+typedef CBool SmallUInt;
+
+/* Some type helpers */
+
+#define SC  static const
+#define SV  static volatile
+#define SVC SV const
+
+/*
+ * NOTE: All build size increasions are with
+ * no optimisations (as in no flags passed),
+ * no stripping or anything, also:
+ * Effect on the binary: <previous binary size> - <new binary size>
+ *
+ * Meaning negative size adds onto the binary size, where
+ * as positive -- removes, all of these values should be
+ * treated like aprox. size differences, not solid
+ */
 
 /* Do you want to inherit groups to root user?
- * (Increases build size by ~1KB) */
+ * (Effect on the binary: -1.2879999999999985 KB) */
 #define HAVE_INITGROUP
 
 /* Do you want to modify environment?
- * (Increases build size by ~39KB)*/
+ * (Effect on the binary: -0.272000000000002 KB)*/
 #define HAVE_MODIFYENV
 
 /* Do you want argument support?
- * (Increases build size by ~2KB)*/
+ * (Effect on the binary: -0.11199999999999832 KB)*/
 #define HAVE_ARG
 
 /* Do you want to validate groups?
- * (Increases build size by ~5KB) */
+ * (Effect on the binary: -0.7600000000000016 KB) */
 #define HAVE_VALIDATEGRP
 
 /* Do you want to validate the password?
- * (Increases build size by ~6KB) */
+ * (Effect on the binary: -10.783999999999999 KB) */
 #define HAVE_VALIDATEPASS
 
 /* Do you want to disable echoing?
- * (Increases build size by ~0.2KB) */
+ * (Effect on the binary: -0.20800000000000196 KB) */
 #define HAVE_NOECHO
 
 /* Do you want to have logging?
- * (Increases build size by ~9KB) */
+ * (Effect on the binary: -5.648 KB) */
 #define HAVE_LOGGING
 
 /* Allow piping of password?
- * (Decreases the build size by ~0.04KB) */
+ * (Effect on the binary: 0 KB) */
 #define HAVE_PIPE
 
 /* Remember authentication?
- * (Increases the build size by ~1KB) */
+ * (Effect on the binary: -5.671999999999997 KB) */
 #define HAVE_REMEMBERAUTH
+
+/* Should kos infinitely ask for a password?
+ * (Effect on the binary: 0 KB) */
+#define HAVE_INFINITE_ASK
 
 #ifdef HAVE_REMEMBERAUTH
 /* The directory to store the remember files */
-static const char *REMEMBER_AUTH_DIR = "/var/kos/";
+SC char *REMEMBER_AUTH_DIR = "/var/kos/";
 
 /* Max length of a UID */
-static const amm_t UID_MAX = 16;
+SC amm_t UID_MAX = 16;
 
 /* Max grace period in seconds */
-static const amm_t GRACE_TIME = 300;
+SVC amm_t GRACE_TIME = 300;
 #endif
 
 /* What is root user ID? */
-static const unsigned char ROOT_UID = 0;
+SVC SmallUInt ROOT_UID = 0;
 
 /* What is root group ID? */
-static const unsigned char ROOT_GID = 0;
-
-/* Should kos infinitely ask for a password? */
-static const unsigned char INFINITE_ASK = 0;
+SVC SmallUInt ROOT_GID = 0;
 
 /* The valid ammount of times password should be entered */
-static amm_t PASSWORD_AMMOUNT = 3;
+SV amm_t PASSWORD_AMMOUNT = 3;
 
 /* Increment ammount for PASSWORD_AMMOUNT */
-static amm_t PASSWORD_AMMOUNT_INC = 1;
+SV amm_t PASSWORD_AMMOUNT_INC = 1;
 
 /* Should kos skip checking authentication if the user is the user is already
  * root? */
-static const unsigned char SKIP_ROOT_AUTH = 1;
+SVC CBool SKIP_ROOT_AUTH = 1;
 
+#ifdef HAVE_VALIDATEGRP
 /* Main kos group which all users have to be a part of when using kos */
-static const char *MAIN_GROUP = "kos";
+SC char *MAIN_GROUP = "kos";
+#endif

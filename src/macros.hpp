@@ -1,55 +1,39 @@
 #pragma once
 
+#ifdef HAVE_LOGGING
+#define EXIF_LOGGING(what) what;
+#else
+#define EXIF_LOGGING(what)
+#endif
+
 #define RETIF_FAIL(ret)      \
     if (ret != EXIT_SUCCESS) \
         return EXIT_FAILURE;
 
-#ifdef HAVE_LOGGING
-#define ERRORIF_COND(emsg, cond) \
-    if (cond) {                  \
-        log_error(emsg);         \
-        return EXIT_FAILURE;     \
+#define ERRORIF_COND(emsg, cond)       \
+    if (cond) {                        \
+        EXIF_LOGGING(log_error(emsg)); \
+        return EXIT_FAILURE;           \
     }
-#else
-#define ERRORIF_COND(emsg, cond) \
-    if (cond) {                  \
-        return EXIT_FAILURE;     \
-    }
-#endif
 
 #ifdef HAVE_LOGGING
-#define strerrno std::string(strerror(errno))
+#define WSTRERRNO(msg) std::string(msg) + ": " + strerror(errno)
 #else
-#define strerrno std::string()
+#define WSTRERRNO(msg)
 #endif
 
-#ifdef HAVE_LOGGING
-#define _errorif_cln_grp(msg, cond) \
-    if (cond) {                     \
-        free(groups);               \
-        log_error(msg);             \
-        return EXIT_FAILURE;        \
+#define _errorif_cln_grp(msg, cond)   \
+    if (cond) {                       \
+        free(groups);                 \
+        EXIF_LOGGING(log_error(msg)); \
+        return EXIT_FAILURE;          \
     }
-#else
-#define _errorif_cln_grp(msg, cond) \
-    if (cond) {                     \
-        free(groups);               \
-        return EXIT_FAILURE;        \
-    }
-#endif
 
-#ifdef HAVE_LOGGING
-#define EXITIF_COND(emsg, cond, ex) \
-    if (cond) {                     \
-        log_error(emsg);            \
-        exit(ex);                   \
+#define EXITIF_COND(emsg, cond, ex)    \
+    if (cond) {                        \
+        EXIF_LOGGING(log_error(emsg)); \
+        exit(ex);                      \
     }
-#else
-#define EXITIF_COND(emsg, cond, ex) \
-    if (cond) {                     \
-        exit(ex);                   \
-    }
-#endif
 
 #ifdef HAVE_REMEMBERAUTH
 #define VER_CHECK_TIME_STAT(code)                                    \
@@ -63,6 +47,17 @@
             code;                                                    \
     }
 #endif
+
+#ifndef STDIN_FILENO
+#ifdef _POSIX_C_SOURCE
+#define STDIN_FILENO 0
+#else
+#define _STDIN_FILENO_FILENO_FN
+#define STDIN_FILENO fileno(stdin)
+#endif
+#endif
+
+#define ENV_AMMOUNT 4
 
 #define EXIT_FLAG   2
 #define EXIT_STDIN  3
