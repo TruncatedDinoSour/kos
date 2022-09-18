@@ -83,10 +83,11 @@ inline void log_error(const std::string emsg) {
 
 #ifdef HAVE_VALIDATEPASS
 #ifdef HAVE_LOGGING
-std::string input_no_echo(const std::string prompt) {
+std::string input_no_echo(const std::string prompt)
 #else
-std::string internal_input_no_echo(void) {
+std::string internal_input_no_echo(void)
 #endif
+{
     /*
      * This function seems overcomplicated,
      * so as a TODO I say we leave it here
