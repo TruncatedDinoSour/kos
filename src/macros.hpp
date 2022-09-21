@@ -36,16 +36,13 @@
     }
 
 #ifdef HAVE_REMEMBERAUTH
-#define VER_CHECK_TIME_STAT(code)                                    \
-    static char uid_str[UID_MAX] = {0};                              \
-    snprintf(uid_str, UID_MAX, "%d", temp_validate_user_id);         \
-    std::string verpath =                                            \
-        std::string(REMEMBER_AUTH_DIR) + "/" + std::string(uid_str); \
-    struct stat t_stat;                                              \
-    if (stat(verpath.c_str(), &t_stat) != -1) {                      \
-        if ((time(NULL) - t_stat.st_mtime) > GRACE_TIME)             \
-            code;                                                    \
-    }
+#define VER_CHECK_TIME_STAT(code)                                \
+    std::string verpath = std::string(REMEMBER_AUTH_DIR) + "/" + \
+                          std::to_string(temp_validate_user_id); \
+    struct stat t_stat;                                          \
+    if (stat(verpath.c_str(), &t_stat) != -1)                    \
+        if ((time(NULL) - t_stat.st_mtime) > GRACE_TIME)         \
+            code;
 #endif
 
 #ifndef STDIN_FILENO

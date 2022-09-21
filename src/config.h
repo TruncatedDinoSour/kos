@@ -71,9 +71,6 @@ typedef CBool SmallUInt;
 /* The directory to store the remember files */
 SC char *REMEMBER_AUTH_DIR = "/var/kos/";
 
-/* Max length of a UID */
-SC amm_t UID_MAX = 16;
-
 /* Max grace period in seconds */
 SVC amm_t GRACE_TIME = 300;
 #endif

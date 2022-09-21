@@ -5,7 +5,7 @@ inline bool is_passible_root(void);
 #ifdef HAVE_LOGGING
 inline void log_error(const std::string emsg);
 #else
-#define log_error(msg)
+#define log_error(emsg)
 #endif
 
 int run_command(char *command[]);
