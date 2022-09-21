@@ -354,8 +354,9 @@ int main(int argc, char *argv[]) {
     RETIF_FAIL(validate_password() != EXIT_SUCCESS);
 #endif
 
-    ERRORIF_COND(WSTRERRNO("Set{g/u}id() failed: "),
-                 setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1);
+    ERRORIF_COND(WSTRERRNO("Set[e]{g/u}id() failed: "),
+                 setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1 ||
+                     seteuid(ROOT_UID) == -1 || setegid(ROOT_GID) == -1);
 
 #ifdef HAVE_INITGROUP
     RETIF_FAIL(init_groups())
