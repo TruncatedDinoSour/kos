@@ -11,24 +11,24 @@
 
 # Requirements
 
-- Pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
-- Libxcrypt: https://github.com/besser82/libxcrypt
+-   Pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
+-   Libxcrypt: https://github.com/besser82/libxcrypt
 
 # Why kos?
 
-- Very fast compilation times
-- Small amount of dependencies
-- GPLv3 License
-- Quite simple
-- Does not use PAM
+-   Very fast compilation times
+-   Small amount of dependencies
+-   GPLv3 License
+-   Quite simple
+-   Does not use PAM
 
 # Third party software support
 
-- [Bash completion](https://github.com/scop/bash-completion) (Install `completions/kos.bash` into `/usr/share/bash-completion/completions/kos`)
+-   [Bash completion](https://github.com/scop/bash-completion) (Install `completions/kos.bash` into `/usr/share/bash-completion/completions/kos`)
 
 # Known issues
 
-- Only supported on Linux
+-   Only supported on Linux
 
 ```
 shadow.h is one of the requirements of kos which is a "linux thing",
@@ -44,7 +44,7 @@ be ran on linux and was made with the intention to be used on
 and with linux...
 ```
 
-- Overcomplicated `input_no_echo()` function
+-   Overcomplicated `input_no_echo()` function
 
 ```
 I used that function because it's literally the only
@@ -52,7 +52,7 @@ way I know how to disable eching of STDIN in linux with
 C++ without using some huge lib like GNU readline or something...
 ```
 
-- Not overly safe authentication storing
+-   Not overly safe authentication storing
 
 ```
 The system kos uses to store authentication is by having a
@@ -82,7 +82,7 @@ CXX=g++ ./scripts/build.sh  # Compiles with GCC instead of Clang (default)
 ./scripts/strip.sh kos
 su -c 'mkdir -p /usr/local/bin'
 su -c 'chown root:root ./kos'
-su -c 'install -Dm4711 ./kos /usr/local/bin'
+su -c 'install -Dm4111 ./kos /usr/local/bin'
 ```
 
 ### [Man page](https://man-db.nongnu.org/) installation
@@ -105,9 +105,9 @@ su -c 'cp completions/kos.bash /usr/share/bash-completion/completions/kos'
 
 Before running the script you can optionally:
 
-- Set the `DO_STRIP` environment variable to strip the binary after compilation
-- Set the `INSTALL_MAN` environment variable to also install man page
-- Set the `INSTALL_BCOMP` environment variable to also install bash completion
+-   Set the `DO_STRIP` environment variable to strip the binary after compilation
+-   Set the `INSTALL_MAN` environment variable to also install man page
+-   Set the `INSTALL_BCOMP` environment variable to also install bash completion
 
 ```sh
 chmod a+rx ./scripts/setup.sh
@@ -116,27 +116,28 @@ su -c './scripts/setup.sh'
 
 # Note for packagers
 
-- Arch Linux
+-   Arch Linux
 
 ```
 Permission issues (ERROR: Failed getting groups for user ...)
     The issue can be solved with one install command:
     $ install -Dm4755 -o root "$srcdir/$pkgname-$pkgver/kos" "$pkgdir/usr/bin/kos"
+Although this reduces security
 ```
 
 # Packages
 
-- Gentoo Linux:
-  - [app-admin/kos::dinolay](https://ari-web.xyz/gentooatom/app-admin/kos)
-- Arch Linux
-  - [AUR/kos@moonaru](https://aur.archlinux.org/packages/kos)
+-   Gentoo Linux:
+    -   [app-admin/kos::dinolay](https://ari-web.xyz/gentooatom/app-admin/kos)
+-   Arch Linux
+    -   [AUR/kos@moonaru](https://aur.archlinux.org/packages/kos)
 
 # Tips
 
-- If you're building for size make sure to build with `-Os` or `-Oz` in `CXXFLAGS`
-  as it barely touches start times but it decreases the size largely, stripping
-  can help too
-- If you every want to debug kos use `-g -O0` CXXFLAGS
+-   If you're building for size make sure to build with `-Os` or `-Oz` in `CXXFLAGS`
+    as it barely touches start times but it decreases the size largely, stripping
+    can help too
+-   If you every want to debug kos use `-g -O0` CXXFLAGS
 
 # Testing
 
@@ -146,13 +147,13 @@ libs.
 
 If you want to test it you just run the scripts, though which ones?
 
-- If you have access to root run: `root.sh`
-- If you have access to a non-privileged user run: `noroot.sh`
-- If you have access to both run.. Well both
+-   If you have access to root run: `root.sh`
+-   If you have access to a non-privileged user run: `noroot.sh`
+-   If you have access to both run.. Well both
 
 ## Highly recommended
 
-- Run [valgrind](https://valgrind.org/info/about.html) on kos
+-   Run [valgrind](https://valgrind.org/info/about.html) on kos
 
 ```sh
 CXXFLAGS='-Og -g' ./scripts/build.sh
@@ -169,11 +170,11 @@ you can see the log file in `valgrind.log`
 
 ## Requirements
 
-- Clang
-- GCC
-- Coreutils
-- Bash
-- [Net-tools](http://net-tools.sourceforge.net/) (or a `hostname` command)
+-   Clang
+-   GCC
+-   Coreutils
+-   Bash
+-   [Net-tools](http://net-tools.sourceforge.net/) (or a `hostname` command)
 
 ## Net-tools is not a thing for me!
 

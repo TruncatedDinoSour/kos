@@ -1,2 +1,2 @@
-- [x] Tests
-- [ ] Better auth storing system
+-   [x] Tests
+-   [ ] Better auth storing system (<https://stackoverflow.com/questions/74082811/what-is-the-best-way-to-store-authentication-login-in-a-system-when-a-user-has>)

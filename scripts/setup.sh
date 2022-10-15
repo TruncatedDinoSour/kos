@@ -20,7 +20,7 @@ main() {
 
     mkdir -p "$BINDIR"
     chown root:root ./kos
-    install -o root -Dm4711 ./kos "$BINDIR"
+    install -o root -Dm4111 ./kos "$BINDIR"
 
     if [ "$INSTALL_MAN" ]; then
         mkdir -p "$MANPREFIX"

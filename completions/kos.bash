@@ -9,7 +9,7 @@ _kos() {
 
         local PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
         _command_offset $cmd
-        # return
+        return
 
         # else
         #     COMPREPLY=('--version')
