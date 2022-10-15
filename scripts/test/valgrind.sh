@@ -33,9 +33,6 @@ main() {
         log 'Optimisation flags'
         optimising "$cmd"
 
-        log 'Command line arguments'
-        flags "$cmd"
-
         rm -rf ./*.out.*
     done
 }

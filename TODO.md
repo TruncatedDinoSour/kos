@@ -1,1 +1,2 @@
 - [x] Tests
+- [ ] Better auth storing system

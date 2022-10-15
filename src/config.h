@@ -20,11 +20,15 @@ typedef CBool SmallUInt;
  * NOTE: All build size increasions are with
  * no optimisations (as in no flags passed),
  * no stripping or anything, also:
- * Effect on the binary: <previous binary size> - <new binary size>
  *
- * Meaning negative size adds onto the binary size, where
- * as positive -- removes, all of these values should be
- * treated like aprox. size differences, not solid
+ * Effect on the binary: <previous binary size (when disabled)> - <new binary
+ * size (when enabled)>
+ *
+ * Meaning negative size when enabled adds onto the binary size,
+ * where as positive -- removes, all of these values should be
+ * treated like aprox. size differences, not solid and accurate,
+ * it highly depends on other features, compiler flags, stripping
+ * and many more variable factors
  */
 
 /* Do you want to inherit groups to root user?
@@ -34,10 +38,6 @@ typedef CBool SmallUInt;
 /* Do you want to modify environment?
  * (Effect on the binary: -0.272000000000002 KB)*/
 #define HAVE_MODIFYENV
-
-/* Do you want argument support?
- * (Effect on the binary: -0.11199999999999832 KB)*/
-#define HAVE_ARG
 
 /* Do you want to validate groups?
  * (Effect on the binary: -0.7600000000000016 KB) */
@@ -67,6 +67,10 @@ typedef CBool SmallUInt;
  * (Effect on the binary: 0 KB) */
 #define HAVE_INFINITE_ASK
 
+/* Should kos set the effective group and user IDs?
+ * (Effect on the binary: -0.1015625 KB) */
+#define HAVE_EFFECTIVE_ID
+
 #ifdef HAVE_REMEMBERAUTH
 /* The directory to store the remember files */
 SC char *REMEMBER_AUTH_DIR = "/var/kos/";
@@ -81,11 +85,15 @@ SVC SmallUInt ROOT_UID = 0;
 /* What is root group ID? */
 SVC SmallUInt ROOT_GID = 0;
 
-/* The valid ammount of times password should be entered */
+/* The valid ammount of times password should be entered
+ * NOTE: Don't make it constant as it gets changed
+ *       on ever password ammount slowly decrementing
+ *       it by `PASSWORD_AMMOUNT_INC`
+ */
 SV amm_t PASSWORD_AMMOUNT = 3;
 
 /* Increment ammount for PASSWORD_AMMOUNT */
-SV amm_t PASSWORD_AMMOUNT_INC = 1;
+SVC amm_t PASSWORD_AMMOUNT_INC = 1;
 
 /* Should kos skip checking authentication if the user is the user is already
  * root? */

@@ -52,17 +52,16 @@ way I know how to disable eching of STDIN in linux with
 C++ without using some huge lib like GNU readline or something...
 ```
 
-# People packaging kos for non-corporate use
+- Not overly safe authentication storing
 
 ```
-I, the creator of kos, permit you to use any of these licenses:
-
-- GPLv3
-- BSD 3-clause
-- ArAr2
-
-If you do not want to bundle ArAr2 license together you are free
-to use any of the other ones
+The system kos uses to store authentication is by having a
+root-only directory (by default: /var/kos) and having a file
+in it with the filename being the user ID, verification works
+by checking its ctime (last modification time iirc) which is not
+super secure, meaning we need to find a better way to store
+authentication, for now we have nothing in mind, although in a one-user
+personal system this shouldn't be much of a risk
 ```
 
 # Building and installing
@@ -74,10 +73,8 @@ _If you are `root` you do not need to use `su`, just run commands directly_
 ### Building
 
 ```sh
-CXXFLAGS='-D_KOS_VERSION="1"' CXX=g++ ./scripts/build.sh  # Compiles with GCC instead of Clang (default)
+CXX=g++ ./scripts/build.sh  # Compiles with GCC instead of Clang (default)
 ```
-
-`CXXFLAGS='-D_KOS_VERSION="1"'` is important as it will define version argument
 
 ### Installing
 

@@ -1,8 +1,3 @@
-// -D_KOS_VERSION_="..."
-#ifndef _KOS_VERSION_
-#define _KOS_VERSION_ "(unknown)"
-#endif
-
 #include "./config.h"
 
 #include <iostream>
@@ -40,11 +35,12 @@ static const char *username    = pw ? pw->pw_name : NULL;
 #endif
 
 #ifdef HAVE_REMEMBERAUTH
+// TODO: Better auth storing system
 static volatile bool temp_validate_user     = false;
 static volatile uid_t temp_validate_user_id = getuid();
 #endif
 
-inline bool is_passible_root(void) {
+bool is_passible_root(void) {
     // Returns true if user is already root or is authenticated
 
 #ifdef HAVE_REMEMBERAUTH
@@ -96,7 +92,7 @@ std::string internal_input_no_echo(void)
      */
 
     if (std::cin.eof())
-        exit(EXIT_FAILURE);
+        exit(EXIT_STDIN);
 
     static const int stdin_num = STDIN_FILENO;
     static const bool piping   = !isatty(stdin_num);
@@ -198,8 +194,7 @@ int run_command(char *command[]) {
     }
 #endif
 
-    ERRORIF_COND(WSTRERRNO("Failed to execvp()"),
-                 (execvp(command[0], command)) < 0);
+    WERRORIF_COND("Failed to execvp()", (execvp(command[0], command)) < 0);
 
     return EXIT_SUCCESS;
 }
@@ -261,17 +256,17 @@ unsigned char validate_group(void) {
 unsigned char modify_env(void) {
     static const struct passwd *rpw = getpwuid(ROOT_UID);
 
-    ERRORIF_COND(WSTRERRNO("Modifying environment failed in getpwuid()"),
-                 rpw == NULL);
+    WERRORIF_COND("Modifying environment failed in getpwuid()", rpw == NULL);
 
+    // NOTE: Don't forget to change ENV_AMMOUNT in macros.h
     const char *env[ENV_AMMOUNT][2] = {{"HOME", rpw->pw_dir},
                                        {"SHELL", rpw->pw_shell},
                                        {"USER", rpw->pw_name},
                                        {"LOGNAME", rpw->pw_name}};
 
     for (static volatile unsigned int idx = 0; idx < ENV_AMMOUNT; ++idx)
-        ERRORIF_COND(WSTRERRNO("Failed to modify environment: "),
-                     setenv(env[idx][0], env[idx][1], 1) == -1);
+        WERRORIF_COND("Failed to modify environment",
+                      setenv(env[idx][0], env[idx][1], 1) == -1);
 
     return EXIT_SUCCESS;
 }
@@ -285,7 +280,7 @@ unsigned char init_groups(void) {
     ERRORIF_COND("Failed to get the root group count", gc == -1);
 
     gid_t *groups = (gid_t *)malloc(sizeof(*groups) * (unsigned long int)gc);
-    ERRORIF_COND(WSTRERRNO("malloc() failed in init_groups()"), groups == NULL);
+    WERRORIF_COND("malloc() failed in init_groups()", groups == NULL);
 
     _errorif_cln_grp(
         WSTRERRNO("Failed to get groups for user " + std::string(rpw->pw_name)),
@@ -303,28 +298,6 @@ unsigned char init_groups(void) {
 }
 #endif
 
-#ifdef HAVE_ARG
-constexpr inline unsigned int sc(const char *str, int h = 0) {
-    return !str[h] ? 5381 : (sc(str, h + 1) * 33) ^ (unsigned int)str[h];
-}
-
-bool parse_arg(const char *arg) {
-    if (!arg || arg[0] != '-')
-        return false;
-
-    switch (sc(arg)) {
-        case sc("--version"):
-            EXIF_LOGGING(std::cout << "Kos version v" << _KOS_VERSION_ << '\n');
-            break;
-        default:
-            log_error(std::string(arg) + ": flag not found");
-            exit(EXIT_FLAG);
-    }
-
-    return true;
-}
-#endif
-
 // MAIN //
 
 #ifndef KOS_H
@@ -334,29 +307,35 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
 #endif
 
-#ifdef HAVE_ARG
-#define _help_arg "command|flag"
-    if (parse_arg(argv[1]))
-        return EXIT_SUCCESS;
-#else
-#define _help_arg "command"
-#endif
-
 #if defined HAVE_VALIDATEPASS || defined HAVE_VALIDATEGRP || \
     defined HAVE_INITGROUP
-    ERRORIF_COND(WSTRERRNO("Failed to initialise /etc/passwd"), pw == NULL);
-    ERRORIF_COND(WSTRERRNO("Failed to get username"), username == NULL);
+    WERRORIF_COND("Failed to initialise /etc/passwd", pw == NULL);
+    WERRORIF_COND("Failed to get username", username == NULL);
 #endif
 
-    ERRORIF_COND("Usage: <" _help_arg "> [args...]", argc < 2);
+    ERRORIF_COND("Usage: <command> [args...]", argc < 2);
 
 #ifdef HAVE_VALIDATEPASS
     RETIF_FAIL(validate_password() != EXIT_SUCCESS);
 #endif
 
-    ERRORIF_COND(WSTRERRNO("Set[e]{g/u}id() failed: "),
-                 setuid(ROOT_UID) == -1 || setgid(ROOT_GID) == -1 ||
-                     seteuid(ROOT_UID) == -1 || setegid(ROOT_GID) == -1);
+    /*
+     * Embedding a directive within macro arguments has undefined behavior
+     */
+
+#ifdef HAVE_EFFECTIVE_ID
+#define __setid_failed_bit "[e]"
+#define __setid_effective_cond \
+    || seteuid(ROOT_UID) == -1 || setegid(ROOT_GID) == -1
+#else
+#define __setid_failed_bit
+#define __setid_effective_cond
+#endif
+
+    WERRORIF_COND("Setting user IDs (set" __setid_failed_bit
+                  "{u,g}id()) failed",
+                  setuid(ROOT_UID) == -1 ||
+                      setgid(ROOT_GID) == -1 __setid_effective_cond);
 
 #ifdef HAVE_INITGROUP
     RETIF_FAIL(init_groups())

@@ -1,6 +1,6 @@
 #pragma once
 
-inline bool is_passible_root(void);
+bool is_passible_root(void);
 
 #ifdef HAVE_LOGGING
 inline void log_error(const std::string emsg);
@@ -30,11 +30,6 @@ unsigned char validate_group(void);
 
 #ifdef HAVE_INITGROUP
 unsigned char init_groups(void);
-#endif
-
-#ifdef HAVE_ARG
-constexpr inline unsigned int sc(const char *str, int h);
-bool parse_arg(const char *arg);
 #endif
 
 #ifdef HAVE_MODIFYENV

@@ -16,6 +16,8 @@
         return EXIT_FAILURE;           \
     }
 
+#define WERRORIF_COND(emsg, cond) ERRORIF_COND(WSTRERRNO(emsg), cond)
+
 #ifdef HAVE_LOGGING
 #define WSTRERRNO(msg) std::string(msg) + ": " + strerror(errno)
 #else
@@ -56,8 +58,7 @@
 
 #define ENV_AMMOUNT 4
 
-#define EXIT_FLAG   2
-#define EXIT_STDIN  3
-#define EXIT_NOPIPE 4
-#define EXIT_TERM   5
-#define EXIT_AUTH   6
+#define EXIT_STDIN  2
+#define EXIT_NOPIPE 3
+#define EXIT_TERM   4
+#define EXIT_AUTH   5
