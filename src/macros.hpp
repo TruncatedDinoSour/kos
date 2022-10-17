@@ -6,6 +6,12 @@
 #define EXIF_LOGGING(what)
 #endif
 
+#ifdef HAVE_LOGGING
+#define FATAL(msg) "FATAL: " msg
+#else
+#define FATAL(msg) ""
+#endif
+
 #define RETIF_FAIL(ret)      \
     if (ret != EXIT_SUCCESS) \
         return EXIT_FAILURE;

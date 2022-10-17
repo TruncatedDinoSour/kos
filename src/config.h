@@ -71,9 +71,21 @@ typedef CBool SmallUInt;
  * (Effect on the binary: -0.1015625 KB) */
 #define HAVE_EFFECTIVE_ID
 
+/* Shoud HAVE_REMEMBERAUTH have a safe implementation?
+ * (Effect on the binary: -0.046875 KB) */
+#ifdef HAVE_REMEMBERAUTH
+#define HAVE_SAFE_REMEMBERAUTH
+#endif
+
+/* Make REMEMBER_AUTH_DIR automatically if it doesn't exist?
+ * (Effect on the binary: -0.046875 KB) */
+#ifdef HAVE_REMEMBERAUTH
+#define HAVE_REMEMBERAUTH_AUTODIR
+#endif
+
 #ifdef HAVE_REMEMBERAUTH
 /* The directory to store the remember files */
-SC char *REMEMBER_AUTH_DIR = "/var/kos/";
+SC char *REMEMBER_AUTH_DIR = "/var/db/kos/";
 
 /* Max grace period in seconds */
 SVC amm_t GRACE_TIME = 300;

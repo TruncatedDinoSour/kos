@@ -52,18 +52,6 @@ way I know how to disable eching of STDIN in linux with
 C++ without using some huge lib like GNU readline or something...
 ```
 
--   Not overly safe authentication storing
-
-```
-The system kos uses to store authentication is by having a
-root-only directory (by default: /var/kos) and having a file
-in it with the filename being the user ID, verification works
-by checking its ctime (last modification time iirc) which is not
-super secure, meaning we need to find a better way to store
-authentication, for now we have nothing in mind, although in a one-user
-personal system this shouldn't be much of a risk
-```
-
 # Building and installing
 
 _If you are `root` you do not need to use `su`, just run commands directly_

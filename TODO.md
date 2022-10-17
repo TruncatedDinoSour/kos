@@ -1,2 +1,3 @@
 -   [x] Tests
--   [ ] Better auth storing system (<https://stackoverflow.com/questions/74082811/what-is-the-best-way-to-store-authentication-login-in-a-system-when-a-user-has>)
+-   [x] Better auth storing system (<https://stackoverflow.com/questions/74082811/what-is-the-best-way-to-store-authentication-login-in-a-system-when-a-user-has>)
+    -   It's basically the same what `sudo` has without PAM baked into it, just added hardened perms

@@ -50,19 +50,34 @@ bool is_passible_root(void) {
         geteuid() == ROOT_UID && SKIP_ROOT_AUTH)
         return true;
 
+#ifdef HAVE_LOGGING
+#define _remember_auth_dir +std::string(REMEMBER_AUTH_DIR) + "'\""
+#else
+#define _remember_auth_dir
+#endif
+
     if (access(REMEMBER_AUTH_DIR, W_OK) == 0 ||
-        access(REMEMBER_AUTH_DIR, R_OK) != 0) {
+        access(REMEMBER_AUTH_DIR, R_OK) == 0) {
+#ifdef HAVE_SAFE_REMEMBERAUTH
         if (access(REMEMBER_AUTH_DIR, F_OK) == 0) {
             EXIF_LOGGING(
                 std::cerr
-                << "FATAL: Authentication failed, reason being that the "
-                   "REMEMBER_AUTH_DIR is invalid"
+                << FATAL("Authentication failed, reason being that the "
+                         "REMEMBER_AUTH_DIR is invalid\n"
+                         "    Make sure the owner is root:\n"
+                         "        $ su -c \"chown root:root -R "
+                         "'" _remember_auth_dir "\n"
+                         "    And/or the perms are 7411:\n"
+                         "        $ su -c \"chmod 7411 -R '" _remember_auth_dir)
                 << '\n');
             exit(EXIT_AUTH);
         }
+#endif
 
         return false;
     }
+
+#undef _remember_auth_dir
 
     return access(verpath.c_str(), F_OK) == 0;
 #else
@@ -147,9 +162,9 @@ int validate_password(amm_t __times = 0) {
     ERRORIF_COND("Negative or zero value for PASSWORD_AMMOUNT",
                  PASSWORD_AMMOUNT <= 0);
 
-    ERRORIF_COND("FATAL: Detected invald PASSWORD_AMMOUNT_INC value (" +
-                     std::to_string(PASSWORD_AMMOUNT_INC) +
-                     "), will not proceed further",
+    ERRORIF_COND(FATAL("Detected invald PASSWORD_AMMOUNT_INC value (" +
+                       std::to_string(PASSWORD_AMMOUNT_INC) +
+                       "), will not proceed further"),
                  __times < 0);
 
 #ifndef HAVE_INFINITE_ASK
@@ -186,10 +201,17 @@ int run_command(char *command[]) {
     VER_CHECK_TIME_STAT(remove(verpath.c_str()));
 
     if (temp_validate_user) {
+#ifdef HAVE_REMEMBERAUTH_AUTODIR
         if (access(REMEMBER_AUTH_DIR, F_OK) != 0)
-            mkdir(REMEMBER_AUTH_DIR, 0755);
+            mkdir(REMEMBER_AUTH_DIR, 0711);
+#endif
 
         std::ofstream(verpath).close();
+
+#ifdef HAVE_SAFE_REMEMBERAUTH
+        chmod(verpath.c_str(), 0600);
+#endif
+
         temp_validate_user = false;
     }
 #endif
